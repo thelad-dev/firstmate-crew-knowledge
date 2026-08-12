@@ -1,0 +1,79 @@
+{
+  "generatedAt": "2026-08-12T12:00:00.000Z",
+  "schemaVersion": 3,
+  "providers": [
+    {
+      "provider": "claude",
+      "label": "Claude",
+      "source": "oauth-file",
+      "state": { "status": "fresh", "stale": false },
+      "quotaSemantics": {
+        "status": "known",
+        "description": "Claude exhausted.",
+        "effectiveAvailability": [
+          {
+            "scope": "all_models",
+            "status": "known",
+            "effectivePercentRemaining": 0,
+            "boundedBy": ["weekly"],
+            "runway": {
+              "status": "exhausted_now",
+              "usableRunwaySeconds": 0
+            }
+          }
+        ]
+      }
+    },
+    {
+      "provider": "codex",
+      "label": "Codex",
+      "source": "oauth",
+      "state": { "status": "fresh", "stale": false },
+      "quotaSemantics": {
+        "status": "known",
+        "description": "Codex healthy.",
+        "effectiveAvailability": [
+          {
+            "scope": "all_models",
+            "status": "known",
+            "effectivePercentRemaining": 80,
+            "boundedBy": ["weekly"],
+            "runway": {
+              "status": "projected_exhaustion",
+              "usableRunwaySeconds": 172800
+            }
+          }
+        ]
+      }
+    },
+    {
+      "provider": "grok",
+      "label": "Grok",
+      "source": "unavailable",
+      "state": {
+        "status": "unavailable",
+        "stale": false,
+        "authStatus": "usable",
+        "error": "Grok consumer quota unavailable"
+      },
+      "quotaSemantics": {
+        "status": "unknown",
+        "description": "No windows.",
+        "effectiveAvailability": []
+      }
+    },
+    {
+      "provider": "cursor",
+      "label": "Cursor",
+      "source": "api",
+      "state": { "status": "fresh", "stale": false },
+      "windows": [
+        { "id": "included_usage", "percentRemaining": 0, "percentUsed": 100 }
+      ],
+      "quotaSemantics": {
+        "status": "unknown",
+        "effectiveAvailability": []
+      }
+    }
+  ]
+}
