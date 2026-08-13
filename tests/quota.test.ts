@@ -147,7 +147,7 @@ describe("readLiveQuota", () => {
     assert.doesNotMatch(denied.degradedReason ?? "", /not found on PATH/);
   });
 
-  it("degrades when AbortSignal aborts an in-flight quota-axi run", async () => {
+  it("rejects when AbortSignal aborts an in-flight quota-axi run", async () => {
     const ac = new AbortController();
     const resultPromise = readLiveQuota({
       signal: ac.signal,
@@ -156,6 +156,7 @@ describe("readLiveQuota", () => {
           const onAbort = () => {
             const err = Object.assign(new Error("The operation was aborted"), {
               code: "ABORT_ERR",
+              name: "AbortError",
             });
             reject(err);
           };
@@ -167,25 +168,37 @@ describe("readLiveQuota", () => {
         }),
     });
     ac.abort();
-    const result = await resultPromise;
-    assert.equal(result.mode, "degraded");
-    assert.match(result.degradedReason ?? "", /quota-axi failed/);
-    assert.doesNotMatch(result.degradedReason ?? "", /not found on PATH/);
+    await assert.rejects(resultPromise, (err: unknown) => {
+      assert.ok(isAbortish(err));
+      return true;
+    });
   });
 
-  it("degrades without spawning when AbortSignal is already aborted", async () => {
+  it("rejects without spawning when AbortSignal is already aborted", async () => {
     const ac = new AbortController();
     ac.abort();
     let spawned = false;
-    const result = await readLiveQuota({
-      signal: ac.signal,
-      exec: async () => {
-        spawned = true;
-        return "{}";
+    await assert.rejects(
+      () =>
+        readLiveQuota({
+          signal: ac.signal,
+          exec: async () => {
+            spawned = true;
+            return "{}";
+          },
+        }),
+      (err: unknown) => {
+        assert.equal(spawned, false);
+        assert.ok(isAbortish(err));
+        return true;
       },
-    });
-    assert.equal(spawned, false);
-    assert.equal(result.mode, "degraded");
-    assert.match(result.degradedReason ?? "", /quota-axi failed/);
+    );
   });
 });
+
+function isAbortish(err: unknown): boolean {
+  if (!err || typeof err !== "object") return false;
+  const code = "code" in err ? (err as { code: unknown }).code : undefined;
+  const name = "name" in err ? (err as { name: unknown }).name : undefined;
+  return code === "ABORT_ERR" || name === "AbortError";
+}

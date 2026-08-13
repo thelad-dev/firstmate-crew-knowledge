@@ -1,4 +1,4 @@
-import { execFile } from "node:child_process";
+import { execFile, type ChildProcess } from "node:child_process";
 import type {
   EffectiveAvailability,
   ProviderQuotaView,
@@ -45,6 +45,7 @@ function defaultQuotaExec(
 ): Promise<string> {
   return new Promise((resolve, reject) => {
     let settled = false;
+    let child: ChildProcess | undefined;
     const settle = (fn: () => void) => {
       if (settled) return;
       settled = true;
@@ -52,14 +53,19 @@ function defaultQuotaExec(
       fn();
     };
     const failAborted = () => {
-      settle(() =>
-        reject(
-          Object.assign(new Error("The operation was aborted"), { code: "ABORT_ERR" }),
-        ),
-      );
+      settle(() => reject(abortError(options.signal?.reason)));
+    };
+    const onAbort = () => {
+      child?.kill("SIGTERM");
+      failAborted();
     };
 
-    const child = execFile(
+    if (options.signal?.aborted) {
+      failAborted();
+      return;
+    }
+
+    child = execFile(
       file,
       [...args],
       {
@@ -80,15 +86,6 @@ function defaultQuotaExec(
       },
     );
 
-    const onAbort = () => {
-      child.kill("SIGTERM");
-      failAborted();
-    };
-
-    if (options.signal?.aborted) {
-      onAbort();
-      return;
-    }
     options.signal?.addEventListener("abort", onAbort, { once: true });
   });
 }
@@ -98,6 +95,20 @@ function nodeErrorCode(err: unknown): unknown {
     return (err as { code: unknown }).code;
   }
   return undefined;
+}
+
+function abortError(reason?: unknown): Error {
+  if (reason instanceof Error) return reason;
+  return Object.assign(new Error("The operation was aborted"), {
+    code: "ABORT_ERR",
+    name: "AbortError",
+  });
+}
+
+function isAbortError(err: unknown): boolean {
+  if (!err || typeof err !== "object") return false;
+  if (nodeErrorCode(err) === "ABORT_ERR") return true;
+  return "name" in err && (err as { name: unknown }).name === "AbortError";
 }
 
 function quotaFailureReason(err: unknown): string {
@@ -123,14 +134,10 @@ export async function readLiveQuota(
 ): Promise<QuotaReadResult> {
   const exec = options.exec ?? defaultQuotaExec;
   const signal = options.signal;
+  if (signal?.aborted) {
+    throw abortError(signal.reason);
+  }
   try {
-    if (signal?.aborted) {
-      const reason =
-        signal.reason instanceof Error
-          ? signal.reason
-          : Object.assign(new Error("The operation was aborted"), { code: "ABORT_ERR" });
-      return degraded(quotaFailureReason(reason));
-    }
     const stdout = await exec("quota-axi", ["--json"], {
       encoding: "utf8",
       timeout: QUOTA_TIMEOUT_MS,
@@ -152,6 +159,7 @@ export async function readLiveQuota(
       providers: snapshot.providers.map(summarizeProvider),
     };
   } catch (err) {
+    if (isAbortError(err)) throw err;
     return degraded(quotaFailureReason(err));
   }
 }
