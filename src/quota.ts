@@ -1,4 +1,4 @@
-import { execFileSync } from "node:child_process";
+import { execFile } from "node:child_process";
 import type {
   EffectiveAvailability,
   ProviderQuotaView,
@@ -13,18 +13,130 @@ export interface QuotaReadResult {
   providers: ProviderQuotaView[];
 }
 
+export type QuotaExec = (
+  file: string,
+  args: readonly string[],
+  options: {
+    encoding: "utf8";
+    timeout: number;
+    maxBuffer: number;
+    env: NodeJS.ProcessEnv;
+    signal?: AbortSignal;
+  },
+) => Promise<string>;
+
+export interface ReadLiveQuotaOptions {
+  signal?: AbortSignal;
+  exec?: QuotaExec;
+}
+
 const QUOTA_TIMEOUT_MS = 20_000;
 
+function defaultQuotaExec(
+  file: string,
+  args: readonly string[],
+  options: {
+    encoding: "utf8";
+    timeout: number;
+    maxBuffer: number;
+    env: NodeJS.ProcessEnv;
+    signal?: AbortSignal;
+  },
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    let settled = false;
+    const settle = (fn: () => void) => {
+      if (settled) return;
+      settled = true;
+      options.signal?.removeEventListener("abort", onAbort);
+      fn();
+    };
+    const failAborted = () => {
+      settle(() =>
+        reject(
+          Object.assign(new Error("The operation was aborted"), { code: "ABORT_ERR" }),
+        ),
+      );
+    };
+
+    const child = execFile(
+      file,
+      [...args],
+      {
+        encoding: "utf8",
+        timeout: options.timeout,
+        maxBuffer: options.maxBuffer,
+        env: options.env,
+        signal: options.signal,
+      },
+      (err, stdout) => {
+        if (err) {
+          settle(() => reject(err));
+          return;
+        }
+        settle(() =>
+          resolve(typeof stdout === "string" ? stdout : stdout.toString("utf8")),
+        );
+      },
+    );
+
+    const onAbort = () => {
+      child.kill("SIGTERM");
+      failAborted();
+    };
+
+    if (options.signal?.aborted) {
+      onAbort();
+      return;
+    }
+    options.signal?.addEventListener("abort", onAbort, { once: true });
+  });
+}
+
+function nodeErrorCode(err: unknown): unknown {
+  if (err && typeof err === "object" && "code" in err) {
+    return (err as { code: unknown }).code;
+  }
+  return undefined;
+}
+
+function quotaFailureReason(err: unknown): string {
+  const message = err instanceof Error ? err.message : String(err);
+  const missing =
+    nodeErrorCode(err) === "ENOENT"
+      ? "quota-axi not found on PATH"
+      : `quota-axi failed: ${message.split("\n")[0]}`;
+  return `${missing}. Using offline knowledge heuristics (labeled degraded).`;
+}
+
+function degraded(reason: string): QuotaReadResult {
+  return {
+    mode: "degraded",
+    degradedReason: reason,
+    providers: [],
+  };
+}
+
 /** Run quota-axi --json from PATH. Never invents credentials. */
-export function readLiveQuota(
-  exec: typeof execFileSync = execFileSync,
-): QuotaReadResult {
+export async function readLiveQuota(
+  options: ReadLiveQuotaOptions = {},
+): Promise<QuotaReadResult> {
+  const exec = options.exec ?? defaultQuotaExec;
+  const signal = options.signal;
   try {
-    const stdout = exec("quota-axi", ["--json"], {
+    if (signal?.aborted) {
+      const reason =
+        signal.reason instanceof Error
+          ? signal.reason
+          : Object.assign(new Error("The operation was aborted"), { code: "ABORT_ERR" });
+      return degraded(quotaFailureReason(reason));
+    }
+    const stdout = await exec("quota-axi", ["--json"], {
       encoding: "utf8",
       timeout: QUOTA_TIMEOUT_MS,
       maxBuffer: 4 * 1024 * 1024,
       env: process.env,
+      signal,
     });
     const snapshot = JSON.parse(stdout) as QuotaSnapshot;
     if (!snapshot || !Array.isArray(snapshot.providers)) {
@@ -40,16 +152,7 @@ export function readLiveQuota(
       providers: snapshot.providers.map(summarizeProvider),
     };
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    const missing =
-      /ENOENT|not found|spawn/i.test(message)
-        ? "quota-axi not found on PATH"
-        : `quota-axi failed: ${message.split("\n")[0]}`;
-    return {
-      mode: "degraded",
-      degradedReason: `${missing}. Using offline knowledge heuristics (labeled degraded).`,
-      providers: [],
-    };
+    return degraded(quotaFailureReason(err));
   }
 }
 
@@ -98,7 +201,12 @@ export function summarizeProvider(p: QuotaProviderSnapshot): ProviderQuotaView {
   // Fallback diagnostic: single window percentRemaining when semantics unknown
   // but a clear 0-remaining window exists — still label as window-diagnostic.
   let exhausted = effectiveRemaining === 0 || usableRunwaySeconds === 0;
-  if (effectiveRemaining === null && Array.isArray(p.windows) && p.windows.length > 0) {
+  if (
+    !stale &&
+    effectiveRemaining === null &&
+    Array.isArray(p.windows) &&
+    p.windows.length > 0
+  ) {
     const remainings = p.windows
       .map((w) => w.percentRemaining)
       .filter((n): n is number => typeof n === "number" && Number.isFinite(n));

@@ -147,8 +147,8 @@ export default function firstmateCrewKnowledge(pi: ExtensionAPI): void {
       "If mode is degraded, prefer knowledge tables and disclose uncertainty.",
     ],
     parameters: ROUTE_PARAMS,
-    async execute(_id, params) {
-      const quota = readLiveQuota();
+    async execute(_id, params, signal) {
+      const quota = await readLiveQuota({ signal });
       const result = routeTask(knowledge, quota, params.task, params.taskClass);
       if (params.format === "json") {
         const payload = routeResultJson(result);
@@ -169,8 +169,8 @@ export default function firstmateCrewKnowledge(pi: ExtensionAPI): void {
       "Do not invent credentials; missing quota-axi yields labeled degraded output.",
     ],
     parameters: BALANCE_PARAMS,
-    async execute(_id, params) {
-      const quota = readLiveQuota();
+    async execute(_id, params, signal) {
+      const quota = await readLiveQuota({ signal });
       const result = balanceProviders(knowledge, quota);
       if (params.format === "json") {
         return textResult(JSON.stringify(result, null, 2), result);
@@ -214,8 +214,8 @@ export default function firstmateCrewKnowledge(pi: ExtensionAPI): void {
       "Only recommend models visible via ExtensionContext modelRegistry/scopedModels.",
     ],
     parameters: SUGGEST_PRIMARY_PARAMS,
-    async execute(_id, params, _signal, _onUpdate, ctx) {
-      const quota = readLiveQuota();
+    async execute(_id, params, signal, _onUpdate, ctx) {
+      const quota = await readLiveQuota({ signal });
       const result = suggestPrimary(knowledge, quota, {
         goal: params.goal,
         search: params.search,
@@ -245,7 +245,7 @@ export default function firstmateCrewKnowledge(pi: ExtensionAPI): void {
         );
         return;
       }
-      const quota = readLiveQuota();
+      const quota = await readLiveQuota();
       const result = routeTask(knowledge, quota, task);
       const text = formatRouteResult(result);
       presentRouteText(ctx.ui, text, result.recommendation.spawnFlags);

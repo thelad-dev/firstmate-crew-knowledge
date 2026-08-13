@@ -112,6 +112,67 @@ describe("applyDispatch", () => {
       rmSync(home, { recursive: true, force: true });
     }
   });
+
+  it("merge writes generated file when existing dispatch is missing", () => {
+    const home = mkdtempSync(join(tmpdir(), "fck-merge-miss-"));
+    try {
+      const result = applyDispatch(pack, {
+        fmHome: home,
+        dryRun: false,
+        merge: true,
+      });
+      assert.equal(result.wrote, true);
+      assert.equal(result.validation.ok, true);
+      const parsed = JSON.parse(readFileSync(result.path, "utf8")) as CrewDispatchFile;
+      assert.ok(Array.isArray(parsed.rules) && parsed.rules.length >= 1);
+    } finally {
+      rmSync(home, { recursive: true, force: true });
+    }
+  });
+
+  it("merge refuses overwrite when existing file is invalid JSON", () => {
+    const home = mkdtempSync(join(tmpdir(), "fck-merge-badjson-"));
+    try {
+      mkdirSync(join(home, "config"), { recursive: true });
+      const path = join(home, "config", "crew-dispatch.json");
+      const original = "{ not json";
+      writeFileSync(path, original);
+      const result = applyDispatch(pack, {
+        fmHome: home,
+        dryRun: false,
+        merge: true,
+      });
+      assert.equal(result.wrote, false);
+      assert.equal(result.validation.ok, false);
+      assert.match(result.summary, /Merge refused/);
+      assert.match(result.validation.errors.join(" "), /not valid JSON/);
+      assert.equal(readFileSync(path, "utf8"), original);
+    } finally {
+      rmSync(home, { recursive: true, force: true });
+    }
+  });
+
+  it("merge refuses overwrite when existing file has no rules array", () => {
+    const home = mkdtempSync(join(tmpdir(), "fck-merge-shape-"));
+    try {
+      mkdirSync(join(home, "config"), { recursive: true });
+      const path = join(home, "config", "crew-dispatch.json");
+      const original = JSON.stringify({ default: { harness: "codex" } });
+      writeFileSync(path, original);
+      const result = applyDispatch(pack, {
+        fmHome: home,
+        dryRun: false,
+        merge: true,
+      });
+      assert.equal(result.wrote, false);
+      assert.equal(result.validation.ok, false);
+      assert.match(result.summary, /Merge refused/);
+      assert.match(result.validation.errors.join(" "), /rules must be an array/);
+      assert.equal(readFileSync(path, "utf8"), original);
+    } finally {
+      rmSync(home, { recursive: true, force: true });
+    }
+  });
 });
 
 describe("mergeDispatch", () => {

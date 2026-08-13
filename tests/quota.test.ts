@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
   pickApplicableAvailability,
+  readLiveQuota,
   summarizeProvider,
 } from "../src/quota.ts";
 import type { QuotaProviderSnapshot } from "../src/types.ts";
@@ -94,5 +95,97 @@ describe("summarizeProvider", () => {
     const v = summarizeProvider(snap);
     assert.equal(v.stale, true);
     assert.equal(v.effectiveRemaining, null);
+  });
+
+  it("does not mark stale zero windows as exhausted", () => {
+    const snap: QuotaProviderSnapshot = {
+      provider: "cursor",
+      state: { status: "fresh", stale: true },
+      windows: [
+        { id: "a", percentRemaining: 0 },
+        { id: "b", percentRemaining: 0 },
+      ],
+      quotaSemantics: { status: "unknown", effectiveAvailability: [] },
+    };
+    const v = summarizeProvider(snap);
+    assert.equal(v.stale, true);
+    assert.equal(v.effectiveRemaining, null);
+    assert.equal(v.exhausted, false);
+  });
+});
+
+function failExec(code: string, message: string): () => Promise<string> {
+  return async () => {
+    const err = new Error(message) as NodeJS.ErrnoException;
+    err.code = code;
+    throw err;
+  };
+}
+
+describe("readLiveQuota", () => {
+  it("labels missing binary only when error.code is ENOENT", async () => {
+    const result = await readLiveQuota({
+      exec: failExec("ENOENT", "spawn quota-axi ENOENT"),
+    });
+    assert.equal(result.mode, "degraded");
+    assert.match(result.degradedReason ?? "", /quota-axi not found on PATH/);
+  });
+
+  it("does not label timeout or permission errors as missing binary", async () => {
+    const timeout = await readLiveQuota({
+      exec: failExec("ETIMEDOUT", "spawnSync quota-axi ETIMEDOUT"),
+    });
+    assert.equal(timeout.mode, "degraded");
+    assert.match(timeout.degradedReason ?? "", /quota-axi failed/);
+    assert.doesNotMatch(timeout.degradedReason ?? "", /not found on PATH/);
+
+    const denied = await readLiveQuota({
+      exec: failExec("EACCES", "spawn quota-axi EACCES"),
+    });
+    assert.equal(denied.mode, "degraded");
+    assert.match(denied.degradedReason ?? "", /quota-axi failed/);
+    assert.doesNotMatch(denied.degradedReason ?? "", /not found on PATH/);
+  });
+
+  it("degrades when AbortSignal aborts an in-flight quota-axi run", async () => {
+    const ac = new AbortController();
+    const resultPromise = readLiveQuota({
+      signal: ac.signal,
+      exec: (_file, _args, options) =>
+        new Promise((_, reject) => {
+          const onAbort = () => {
+            const err = Object.assign(new Error("The operation was aborted"), {
+              code: "ABORT_ERR",
+            });
+            reject(err);
+          };
+          if (options.signal?.aborted) {
+            onAbort();
+            return;
+          }
+          options.signal?.addEventListener("abort", onAbort, { once: true });
+        }),
+    });
+    ac.abort();
+    const result = await resultPromise;
+    assert.equal(result.mode, "degraded");
+    assert.match(result.degradedReason ?? "", /quota-axi failed/);
+    assert.doesNotMatch(result.degradedReason ?? "", /not found on PATH/);
+  });
+
+  it("degrades without spawning when AbortSignal is already aborted", async () => {
+    const ac = new AbortController();
+    ac.abort();
+    let spawned = false;
+    const result = await readLiveQuota({
+      signal: ac.signal,
+      exec: async () => {
+        spawned = true;
+        return "{}";
+      },
+    });
+    assert.equal(spawned, false);
+    assert.equal(result.mode, "degraded");
+    assert.match(result.degradedReason ?? "", /quota-axi failed/);
   });
 });
