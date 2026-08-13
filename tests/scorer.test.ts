@@ -33,10 +33,30 @@ describe("classifyTask", () => {
   it("classifies research by keywords", () => {
     const r = classifyTask(
       pack,
-      "Need live web research on current market news today",
+      "Need live web research on current market news and latest news today",
     );
     assert.equal(r.taskClass.id, "research_web_live");
     assert.notEqual(r.confidence, "low");
+  });
+
+  it("does not classify ordinary coding as research_web_live", () => {
+    const currentBug = classifyTask(
+      pack,
+      "fix the current bug in the login form",
+    );
+    assert.notEqual(currentBug.taskClass.id, "research_web_live");
+
+    const latestCommit = classifyTask(
+      pack,
+      "update the latest commit message",
+    );
+    assert.notEqual(latestCommit.taskClass.id, "research_web_live");
+
+    const freshBranch = classifyTask(
+      pack,
+      "rebase onto a fresh branch today",
+    );
+    assert.notEqual(freshBranch.taskClass.id, "research_web_live");
   });
 
   it("honors explicit class id", () => {

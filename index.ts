@@ -115,19 +115,20 @@ function suggestPrimaryJson(result: ReturnType<typeof suggestPrimary>) {
   };
 }
 
-/** Emit full route text via real ExtensionUIContext APIs (no truncation). */
+/** Emit full route text via real ExtensionUIContext APIs (no truncation, no editor clobber). */
 function presentRouteText(
   ui: ExtensionContext["ui"],
   text: string,
   spawnFlags: string,
 ): void {
-  if (typeof ui.setEditorText === "function") {
-    ui.setEditorText(text);
+  const lines = text.split("\n");
+  if (typeof ui.setWidget === "function") {
+    ui.setWidget("crew-route", lines);
   }
   if (typeof ui.notify === "function") {
-    // Full body via notify as well so RPC/TUI both keep spawn flags intact.
     ui.notify(text, "info");
-  } else if (typeof ui.setStatus === "function") {
+  }
+  if (typeof ui.setStatus === "function") {
     ui.setStatus("crew-route", spawnFlags);
   }
 }
