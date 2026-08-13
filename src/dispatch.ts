@@ -166,11 +166,19 @@ export function applyDispatch(
   const path = crewDispatchPath(home);
 
   if (options.merge) {
-    try {
-      const existing = JSON.parse(readFileSync(path, "utf8")) as CrewDispatchFile;
-      dispatch = mergeDispatch(existing, dispatch);
-    } catch {
-      // no existing or invalid — use generated
+    const existing = loadExistingForMerge(path);
+    if (existing.kind === "unmergeable") {
+      return {
+        dispatch,
+        path,
+        dryRun: true,
+        wrote: false,
+        validation: { ok: false, errors: [existing.error] },
+        summary: `Merge refused; not writing. ${existing.error}`,
+      };
+    }
+    if (existing.kind === "ok") {
+      dispatch = mergeDispatch(existing.doc, dispatch);
     }
   }
 
@@ -209,11 +217,57 @@ export function applyDispatch(
   };
 }
 
+function nodeErrorCode(err: unknown): unknown {
+  if (err && typeof err === "object" && "code" in err) {
+    return (err as { code: unknown }).code;
+  }
+  return undefined;
+}
+
+type ExistingDispatch =
+  | { kind: "missing" }
+  | { kind: "ok"; doc: CrewDispatchFile }
+  | { kind: "unmergeable"; error: string };
+
+function loadExistingForMerge(path: string): ExistingDispatch {
+  let raw: string;
+  try {
+    raw = readFileSync(path, "utf8");
+  } catch (err) {
+    if (nodeErrorCode(err) === "ENOENT") return { kind: "missing" };
+    const message = err instanceof Error ? err.message : String(err);
+    return { kind: "unmergeable", error: `Cannot read existing ${path}: ${message}` };
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return {
+      kind: "unmergeable",
+      error: `Existing ${path} is not valid JSON: ${message}`,
+    };
+  }
+
+  if (!parsed || typeof parsed !== "object" || !Array.isArray((parsed as { rules?: unknown }).rules)) {
+    return {
+      kind: "unmergeable",
+      error: `Existing ${path} cannot be merged: rules must be an array`,
+    };
+  }
+
+  return { kind: "ok", doc: parsed as CrewDispatchFile };
+}
+
 /** Append generated rules that are not already present by exact `when` text. */
 export function mergeDispatch(
   existing: CrewDispatchFile,
   generated: CrewDispatchFile,
 ): CrewDispatchFile {
+  if (!Array.isArray(existing.rules)) {
+    throw new Error("existing.rules must be an array");
+  }
   const whens = new Set(existing.rules.map((r) => r.when));
   const rules = [...existing.rules];
   for (const rule of generated.rules) {
