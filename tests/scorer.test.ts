@@ -57,6 +57,18 @@ describe("classifyTask", () => {
       "rebase onto a fresh branch today",
     );
     assert.notEqual(freshBranch.taskClass.id, "research_web_live");
+
+    const productChanges = classifyTask(
+      pack,
+      "need product changes in the checkout flow",
+    );
+    assert.notEqual(productChanges.taskClass.id, "research_web_live");
+
+    const codebaseResearch = classifyTask(
+      pack,
+      "research why the login test fails",
+    );
+    assert.notEqual(codebaseResearch.taskClass.id, "research_web_live");
   });
 
   it("honors explicit class id", () => {

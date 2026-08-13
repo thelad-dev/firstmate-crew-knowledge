@@ -68,7 +68,8 @@
       "label": "Research / web-live",
       "description": "Needs fresh news, live public facts, current market/product changes, or web-connected research.",
       "keywords": [
-        "research",
+        "web research",
+        "research online",
         "live web",
         "web search",
         "web-connected",
@@ -80,7 +81,7 @@
         "news today",
         "as of today",
         "market news",
-        "product changes"
+        "product news"
       ],
       "qualityFloor": "medium",
       "preferredProfileIds": ["grok-research", "pi-grok-research"],
