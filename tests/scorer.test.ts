@@ -69,6 +69,44 @@ describe("classifyTask", () => {
       "research why the login test fails",
     );
     assert.notEqual(codebaseResearch.taskClass.id, "research_web_live");
+
+    const webSearchFeature = classifyTask(
+      pack,
+      "add web search to the settings page",
+    );
+    assert.notEqual(webSearchFeature.taskClass.id, "research_web_live");
+
+    const currentMarketPrice = classifyTask(
+      pack,
+      "update the current market price in checkout",
+    );
+    assert.notEqual(currentMarketPrice.taskClass.id, "research_web_live");
+
+    const asOfTodayStatus = classifyTask(
+      pack,
+      "as of today the login is broken",
+    );
+    assert.notEqual(asOfTodayStatus.taskClass.id, "research_web_live");
+  });
+
+  it("still classifies lookup-only research phrases as research_web_live", () => {
+    const searchTheWeb = classifyTask(
+      pack,
+      "please search the web for competitor pricing",
+    );
+    assert.equal(searchTheWeb.taskClass.id, "research_web_live");
+
+    const marketNews = classifyTask(
+      pack,
+      "need current market news on the vendor",
+    );
+    assert.equal(marketNews.taskClass.id, "research_web_live");
+
+    const newsAsOfToday = classifyTask(
+      pack,
+      "what is the news as of today on the outage",
+    );
+    assert.equal(newsAsOfToday.taskClass.id, "research_web_live");
   });
 
   it("honors explicit class id", () => {
