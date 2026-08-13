@@ -80,9 +80,7 @@ function defaultQuotaExec(
           settle(() => reject(err));
           return;
         }
-        settle(() =>
-          resolve(typeof stdout === "string" ? stdout : stdout.toString("utf8")),
-        );
+        settle(() => resolve(stdout));
       },
     );
 
@@ -128,7 +126,10 @@ function degraded(reason: string): QuotaReadResult {
   };
 }
 
-/** Run quota-axi --json from PATH. Never invents credentials. */
+/**
+ * Run quota-axi --json from PATH. Never invents credentials.
+ * Missing/failed quota-axi is labeled degraded; AbortSignal cancellation is rethrown, not degraded.
+ */
 export async function readLiveQuota(
   options: ReadLiveQuotaOptions = {},
 ): Promise<QuotaReadResult> {
@@ -169,6 +170,10 @@ export function summarizeSnapshot(snapshot: QuotaSnapshot): ProviderQuotaView[] 
   return (snapshot.providers ?? []).map(summarizeProvider);
 }
 
+/**
+ * Collapse a quota-axi provider snapshot to ranking inputs.
+ * Stale snapshots keep remaining/runway unknown so routing never trusts expired quota.
+ */
 export function summarizeProvider(p: QuotaProviderSnapshot): ProviderQuotaView {
   const stateStatus = p.state?.status ?? "unknown";
   const stale = Boolean(p.state?.stale);

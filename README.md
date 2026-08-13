@@ -21,7 +21,7 @@ Voraussetzung: Node ≥ 22.6, Pi Coding Agent. Für Live-Quota: [`quota-axi`](ht
 
 ## English (short)
 
-Installable Pi package (`pi-package`) that classifies crew work, recommends `--harness/--model/--effort` for Firstmate’s `fm-spawn`, and ranks providers from live `quota-axi --json`. It can dry-run or write `config/crew-dispatch.json` under `FM_HOME`. It does **not** auto-spawn and does **not** replace Firstmate judgment.
+Installable Pi package (`pi-package`) that classifies crew work, recommends `--harness/--model/--effort` for Firstmate’s `fm-spawn`, and ranks providers from live `quota-axi --json`. It can dry-run or write `config/crew-dispatch.json` under the resolved Firstmate home. It does **not** auto-spawn and does **not** replace Firstmate judgment.
 
 ## Firstmate-Anbindung
 
@@ -29,7 +29,7 @@ Installable Pi package (`pi-package`) that classifies crew work, recommends `--h
 | --- | --- |
 | Tool `crew_route` | Task-Text → Klasse + Spawn-Flags + Tradeoff/Quota-Evidence |
 | Tool `crew_balance` | Live-Quota sortiert (Headroom/Runway), degraded wenn `quota-axi` fehlt |
-| Tool `crew_apply_dispatch` | Erzeugt Firstmate-`crew-dispatch.json` (Default: **dry-run**) |
+| Tool `crew_apply_dispatch` | Erzeugt Firstmate-`crew-dispatch.json` (Default: **dry-run**; `merge` hängt fehlende `when`-Regeln an und verweigert unlesbare/ungültige Bestandsdateien) |
 | Tool `crew_suggest_primary` | Listet/sucht authentifizierte Pi-Session-Modelle (`modelRegistry` / `scopedModels`) und empfiehlt ein Primary-Switch-Ziel nur darunter (kein Model-Switch, keine Crew-Panes) |
 | Command `/crew-route …` | Slash-Einstieg: vollständige `crew_route`-Ausgabe via Widget/Notify/Status (ohne Truncation, ohne Editor) |
 
@@ -69,8 +69,8 @@ Tabellen aktualisieren, ohne Scorer-Code anzufassen.
 
 ## Fail-closed / Degraded
 
-- `quota-axi` fehlt oder schlägt fehl → klare Meldung, Offline-Heuristik aus Knowledge, Label **`degraded`**.
-- Unbekannte Quota wird **nicht** als 0 behandelt; erschöpfte Provider werden gemieden, wenn Alternativen existieren.
+- `quota-axi` fehlt oder schlägt fehl → klare Meldung, Offline-Heuristik aus Knowledge, Label **`degraded`**. Abbruch der Tool-Ausführung ist Cancellation, nicht Degraded.
+- Unbekannte Quota (einschließlich stale Snapshots) wird **nicht** als 0 behandelt; erschöpfte Provider werden gemieden, wenn Alternativen existieren.
 - Keine Secrets, keine Billing-APIs außer dem lokalen `quota-axi`.
 
 ## Entwicklung
