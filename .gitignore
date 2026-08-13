@@ -2,3 +2,7 @@ node_modules/
 .no-mistakes/
 *.log
 .DS_Store
+*.tsbuildinfo
+.pi/
+dist/
+coverage/
