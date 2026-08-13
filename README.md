@@ -31,7 +31,7 @@ Installable Pi package (`pi-package`) that classifies crew work, recommends `--h
 | Tool `crew_balance` | Live-Quota sortiert (Headroom/Runway), degraded wenn `quota-axi` fehlt |
 | Tool `crew_apply_dispatch` | Erzeugt Firstmate-`crew-dispatch.json` (Default: **dry-run**) |
 | Tool `crew_suggest_primary` | Listet/sucht authentifizierte Pi-Session-Modelle (`modelRegistry` / `scopedModels`) und empfiehlt ein Primary-Switch-Ziel nur darunter (kein Model-Switch, keine Crew-Panes) |
-| Command `/crew-route …` | Slash-Einstieg: vollständige `crew_route`-Ausgabe via Editor/Notify (ohne Truncation) |
+| Command `/crew-route …` | Slash-Einstieg: vollständige `crew_route`-Ausgabe via Widget/Notify/Status (ohne Truncation, ohne Editor) |
 
 ### Empfohlener Ablauf im Primary
 
@@ -55,7 +55,7 @@ Schema der Dispatch-Datei entspricht Firstmate `docs/examples/crew-dispatch.json
 | `FM_HOME` | Operational Home; Schreibziel `config/crew-dispatch.json` |
 | `FM_ROOT_OVERRIDE` | Fallback, wenn `FM_HOME` unset |
 
-Ohne `FM_HOME` nur Dry-Run/Anzeige — **keine** Writes. Writes gehen ausschließlich nach `FM_HOME/config/…` (explizites Tool mit `dryRun=false`).
+Ohne aufgelöstes Home (`FM_HOME` oder Fallback `FM_ROOT_OVERRIDE`) nur Dry-Run/Anzeige — **keine** Writes. Writes gehen ausschließlich nach `<Home>/config/…` (explizites Tool mit `dryRun=false`).
 
 ## Knowledge-Pack
 

@@ -11,13 +11,14 @@ export interface SessionModelRef {
 /** Minimal shape of Pi ExtensionContext model surfaces used here. */
 export interface SessionModelSource {
   modelRegistry?: {
-    getAvailable?: () => Array<{ provider: string; id: string; name?: string }>;
-    getAll?: () => Array<{ provider: string; id: string; name?: string }>;
-    hasConfiguredAuth?: (model: {
+    getAvailable?(): Array<{ provider: string; id: string; name?: string }>;
+    getAll?(): Array<{ provider: string; id: string; name?: string }>;
+    // Method syntax keeps parameter checking bivariant so ModelRegistry assigns.
+    hasConfiguredAuth?(model: {
       provider: string;
       id: string;
       name?: string;
-    }) => boolean;
+    }): boolean;
   };
   scopedModels?: ReadonlyArray<{
     model: { provider: string; id: string; name?: string };

@@ -7,7 +7,7 @@ Pi-Package (`pi-package`), das Firstmate bei Crew-Routing und Quota-Balance unte
 - Installierbare Extension: `package.json` → `"pi": { "extensions": ["./index.ts"] }`
 - Tools: `crew_route`, `crew_balance`, `crew_apply_dispatch`, `crew_suggest_primary`
 - Knowledge: `knowledge/*.json` (Task-Klassen, Provider, Profile)
-- Pure Logik: `src/` (quota, scorer, dispatch, fm-home)
+- Logik in `src/`
 
 ## Was es nicht ist
 
@@ -27,7 +27,7 @@ Autoritative Firstmate-Doku liegt im Firstmate-Home (nicht hier kopieren):
 
 - User-facing Docs: Deutsch; kurze English-Section in README ok
 - Commits/PR: Deutsch, ohne AI-Co-Author-Meta
-- Writes nur unter `FM_HOME/config` und nur bei explizitem Tool-Call (`dryRun=false`)
+- Writes nur unter dem aufgelösten Home/config (siehe README) und nur bei explizitem Tool-Call (`dryRun=false`)
 - Tests: `npm test` (Node built-in test runner, Fixtures, kein Netz)
 
 ## Maintaining this file
