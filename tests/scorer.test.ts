@@ -50,6 +50,27 @@ describe("classifyTask", () => {
     assert.equal(r.taskClass.id, "standard_ship");
     assert.equal(r.confidence, "low");
   });
+
+  it("does not false-fire short keywords inside ordinary English", () => {
+    // "pr" must not match improve/approach/provider/primary; "ship" not relationship/ownership
+    const r = classifyTask(
+      pack,
+      "improve the approach for the provider primary relationship ownership",
+    );
+    assert.equal(r.taskClass.id, "standard_ship");
+    assert.equal(r.confidence, "low");
+    assert.match(r.notes.join(" "), /Keine Keyword-Treffer/);
+  });
+
+  it("still matches real pull-request / ship phrasing", () => {
+    const pr = classifyTask(pack, "please open a pr for this feature");
+    assert.equal(pr.taskClass.id, "standard_ship");
+    assert.notEqual(pr.confidence, "low");
+
+    const ship = classifyTask(pack, "ready to ship it after review");
+    assert.equal(ship.taskClass.id, "standard_ship");
+    assert.notEqual(ship.confidence, "low");
+  });
 });
 
 describe("rankCandidates / routeTask with fixtures", () => {

@@ -10,7 +10,7 @@
  * Does not replace Firstmate judgment or auto-spawn crewmates.
  */
 
-import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { Type } from "typebox";
 import { applyDispatch } from "./src/dispatch.ts";
 import {
@@ -21,7 +21,11 @@ import {
 } from "./src/format.ts";
 import { loadKnowledge } from "./src/knowledge.ts";
 import { readLiveQuota } from "./src/quota.ts";
-import { balanceProviders, classifyTask, routeTask } from "./src/scorer.ts";
+import { balanceProviders, routeTask } from "./src/scorer.ts";
+import {
+  formatSuggestPrimaryResult,
+  suggestPrimary,
+} from "./src/suggest-primary.ts";
 
 const knowledge = loadKnowledge();
 
@@ -73,6 +77,17 @@ const SUGGEST_PRIMARY_PARAMS = Type.Object({
         "What the primary Firstmate session needs (e.g. long refactor, cheap triage).",
     }),
   ),
+  search: Type.Optional(
+    Type.String({
+      description:
+        "Optional filter over authenticated session models (provider, id, or name substring).",
+    }),
+  ),
+  format: Type.Optional(
+    Type.Union([Type.Literal("text"), Type.Literal("json")], {
+      description: "Response format (default text)",
+    }),
+  ),
 });
 
 function textResult(text: string, details?: unknown) {
@@ -80,6 +95,41 @@ function textResult(text: string, details?: unknown) {
     content: [{ type: "text" as const, text }],
     details,
   };
+}
+
+function suggestPrimaryJson(result: ReturnType<typeof suggestPrimary>) {
+  return {
+    goal: result.goal,
+    search: result.search,
+    taskClassId: result.taskClassId,
+    mode: result.mode,
+    degradedReason: result.degradedReason,
+    currentModel: result.currentModel,
+    availableCount: result.availableCount,
+    listedSource: result.listedSource,
+    recommendation: result.recommendation,
+    matches: result.matches,
+    searchHits: result.searchHits,
+    notes: result.notes,
+    disclaimer: result.disclaimer,
+  };
+}
+
+/** Emit full route text via real ExtensionUIContext APIs (no truncation). */
+function presentRouteText(
+  ui: ExtensionContext["ui"],
+  text: string,
+  spawnFlags: string,
+): void {
+  if (typeof ui.setEditorText === "function") {
+    ui.setEditorText(text);
+  }
+  if (typeof ui.notify === "function") {
+    // Full body via notify as well so RPC/TUI both keep spawn flags intact.
+    ui.notify(text, "info");
+  } else if (typeof ui.setStatus === "function") {
+    ui.setStatus("crew-route", spawnFlags);
+  }
 }
 
 export default function firstmateCrewKnowledge(pi: ExtensionAPI): void {
@@ -154,45 +204,31 @@ export default function firstmateCrewKnowledge(pi: ExtensionAPI): void {
     name: "crew_suggest_primary",
     label: "Crew Suggest Primary",
     description:
-      "Suggest a Pi primary-session model family from knowledge + quota (optional assist). Does not switch models or touch crew panes. pi-model-switch not required.",
+      "List/search authenticated Pi session models and recommend a primary-session switch target among models actually available now. Advisory only — does not switch models or touch crew panes. pi-model-switch not required.",
     promptSnippet:
-      "Suggest a primary Pi session model target without switching",
+      "Suggest a primary Pi session model from authenticated session catalogue without switching",
     promptGuidelines: [
       "Advisory only — do not call model switch APIs unless the captain asks separately.",
       "Never hijack crewmate panes.",
+      "Only recommend models visible via ExtensionContext modelRegistry/scopedModels.",
     ],
     parameters: SUGGEST_PRIMARY_PARAMS,
-    async execute(_id, params) {
+    async execute(_id, params, _signal, _onUpdate, ctx) {
       const quota = readLiveQuota();
-      const goal = params.goal ?? "standard primary orchestration";
-      const classification = classifyTask(knowledge, goal);
-      const routed = routeTask(knowledge, quota, goal, classification.taskClass.id);
-      // Prefer Pi-harness candidates for primary-session suggestion
-      const piAlt = [routed.recommendation, ...routed.alternatives].find(
-        (c) => c.profile.harness === "pi",
-      );
-      const pick = piAlt ?? routed.recommendation;
-      const lines = [
-        "# crew_suggest_primary",
-        "",
-        `Goal: ${goal}`,
-        `Suggested class: ${routed.taskClass.id}`,
-        `Mode: ${routed.mode}${routed.degradedReason ? ` — ${routed.degradedReason}` : ""}`,
-        "",
-        piAlt
-          ? `Pi primary candidate: --model ${pick.profile.model ?? "(default)"} (profile ${pick.profile.id})`
-          : `No Pi-harness profile in class shortlist; nearest spawn profile: ${pick.spawnFlags}`,
-        `tradeoff: ${pick.tradeoff}`,
-        "",
-        "This does not switch models. Compatible with manual /model or optional pi-model-switch if installed.",
-        "Does not affect crewmate panes.",
-        routed.disclaimer,
-      ];
-      return textResult(lines.join("\n"), {
-        suggestion: pick.profile,
-        spawnFlags: pick.spawnFlags,
-        mode: routed.mode,
+      const result = suggestPrimary(knowledge, quota, {
+        goal: params.goal,
+        search: params.search,
+        session: {
+          modelRegistry: ctx?.modelRegistry,
+          scopedModels: ctx?.scopedModels,
+          model: ctx?.model,
+        },
       });
+      const payload = suggestPrimaryJson(result);
+      if (params.format === "json") {
+        return textResult(JSON.stringify(payload, null, 2), payload);
+      }
+      return textResult(formatSuggestPrimaryResult(result), payload);
     },
   });
 
@@ -211,16 +247,7 @@ export default function firstmateCrewKnowledge(pi: ExtensionAPI): void {
       const quota = readLiveQuota();
       const result = routeTask(knowledge, quota, task);
       const text = formatRouteResult(result);
-      // Prefer chat-visible output when API allows; fall back to notify.
-      const ui = ctx.ui as {
-        notify: (msg: string, level?: string) => void;
-        insertText?: (text: string) => void;
-      };
-      if (typeof ui.insertText === "function") {
-        ui.insertText(text);
-      } else {
-        ui.notify(text.slice(0, 500), "info");
-      }
+      presentRouteText(ctx.ui, text, result.recommendation.spawnFlags);
     },
   });
 }

@@ -52,7 +52,7 @@ export function classifyTask(
   const text = taskText.toLowerCase();
   const scores: Array<{ cls: TaskClass; score: number; hits: string[] }> = [];
   for (const cls of pack.taskClasses) {
-    const hits = cls.keywords.filter((k) => text.includes(k.toLowerCase()));
+    const hits = cls.keywords.filter((k) => keywordMatches(text, k));
     scores.push({ cls, score: hits.length, hits });
   }
   scores.sort((a, b) => b.score - a.score);
@@ -94,6 +94,18 @@ export function buildSpawnFlags(profile: KnowledgeProfile): string {
 function shellQuote(value: string): string {
   if (/^[A-Za-z0-9_./:@+-]+$/.test(value)) return value;
   return `'${value.replace(/'/g, `'\\''`)}'`;
+}
+
+/**
+ * Match keywords on token/phrase boundaries so short tokens like "pr" or "ship"
+ * do not false-fire inside ordinary English (improve, relationship, …).
+ */
+export function keywordMatches(haystackLower: string, keyword: string): boolean {
+  const k = keyword.toLowerCase().trim();
+  if (!k) return false;
+  const escaped = k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/\s+/g, "\\s+");
+  const re = new RegExp(`(?:^|[^a-z0-9_])${escaped}(?:$|[^a-z0-9_])`, "i");
+  return re.test(haystackLower);
 }
 
 /**

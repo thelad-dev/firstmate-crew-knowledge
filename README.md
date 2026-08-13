@@ -30,8 +30,8 @@ Installable Pi package (`pi-package`) that classifies crew work, recommends `--h
 | Tool `crew_route` | Task-Text → Klasse + Spawn-Flags + Tradeoff/Quota-Evidence |
 | Tool `crew_balance` | Live-Quota sortiert (Headroom/Runway), degraded wenn `quota-axi` fehlt |
 | Tool `crew_apply_dispatch` | Erzeugt Firstmate-`crew-dispatch.json` (Default: **dry-run**) |
-| Tool `crew_suggest_primary` | Optionaler Hinweis für die Primary-Pi-Session (kein Model-Switch, keine Crew-Panes) |
-| Command `/crew-route …` | Kurzer Slash-Einstieg für `crew_route` |
+| Tool `crew_suggest_primary` | Listet/sucht authentifizierte Pi-Session-Modelle (`modelRegistry` / `scopedModels`) und empfiehlt ein Primary-Switch-Ziel nur darunter (kein Model-Switch, keine Crew-Panes) |
+| Command `/crew-route …` | Slash-Einstieg: vollständige `crew_route`-Ausgabe via Editor/Notify (ohne Truncation) |
 
 ### Empfohlener Ablauf im Primary
 
