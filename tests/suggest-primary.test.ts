@@ -93,6 +93,31 @@ describe("listAuthenticatedSessionModels", () => {
       ["xai/grok-4"],
     );
   });
+
+  it("returns empty when getAvailable is empty (no getAll fallback)", () => {
+    const listed = listAuthenticatedSessionModels({
+      modelRegistry: {
+        getAvailable: () => [],
+        getAll: () => [{ provider: "anthropic", id: "claude-sonnet-4" }],
+      },
+    });
+    assert.equal(listed.source, "empty");
+    assert.equal(listed.models.length, 0);
+  });
+
+  it("returns empty when hasConfiguredAuth filters to zero", () => {
+    const listed = listAuthenticatedSessionModels(
+      sessionWith(
+        [
+          { provider: "anthropic", id: "claude-sonnet-4" },
+          { provider: "xai", id: "grok-4" },
+        ],
+        { authed: new Set() },
+      ),
+    );
+    assert.equal(listed.source, "empty");
+    assert.equal(listed.models.length, 0);
+  });
 });
 
 describe("searchSessionModels", () => {

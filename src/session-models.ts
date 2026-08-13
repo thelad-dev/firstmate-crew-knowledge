@@ -78,37 +78,40 @@ export function listAuthenticatedSessionModels(
   }
 
   const registry = source.modelRegistry;
-  let raw =
+  const raw =
     typeof registry?.getAvailable === "function" ? registry.getAvailable() : [];
 
-  if (!raw.length && typeof registry?.getAll === "function") {
-    raw = registry.getAll();
-    if (raw.length) {
-      notes.push("getAvailable() empty; fell back to getAll() catalogue.");
-    }
+  if (!raw.length) {
+    notes.push(
+      "No authenticated/available Pi models visible in this session context.",
+    );
+    return { models: [], current, source: "empty", notes };
   }
 
-  if (raw.length && typeof registry?.hasConfiguredAuth === "function") {
+  let filtered = raw;
+  if (typeof registry?.hasConfiguredAuth === "function") {
     const authed = raw.filter((m) => {
       try {
         return registry.hasConfiguredAuth!(m);
       } catch {
-        return true;
+        return false;
       }
     });
-    if (authed.length > 0) {
-      raw = authed;
-      notes.push("Filtered to models with configured auth.");
-    } else {
+    if (authed.length === 0) {
       notes.push(
-        "No model passed hasConfiguredAuth; listing unfiltered available catalogue.",
+        "getAvailable() returned models but none passed hasConfiguredAuth.",
       );
+      return { models: [], current, source: "empty", notes };
     }
-  } else if (raw.length) {
-    notes.push("Auth filter unavailable; listing getAvailable() catalogue.");
+    filtered = authed;
+    notes.push("Filtered to models with configured auth.");
+  } else {
+    notes.push(
+      "Auth filter unavailable; listing getAvailable() catalogue as session-available.",
+    );
   }
 
-  const models = dedupeModels(raw.map(toSessionModelRef));
+  const models = dedupeModels(filtered.map(toSessionModelRef));
   if (!models.length) {
     notes.push(
       "No authenticated/available Pi models visible in this session context.",
