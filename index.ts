@@ -59,13 +59,13 @@ const APPLY_PARAMS = Type.Object({
   dryRun: Type.Optional(
     Type.Boolean({
       description:
-        "Default true. When false, writes config/crew-dispatch.json under FM_HOME/config only.",
+        "Default true. When false, writes only <resolved-home>/config/crew-dispatch.json (FM_HOME, else FM_ROOT_OVERRIDE).",
     }),
   ),
   merge: Type.Optional(
     Type.Boolean({
       description:
-        "When true, append generated rules whose `when` text is not already present.",
+        "When true, append generated rules whose `when` text is not already present. Unreadable or invalid existing files refuse the write (no overwrite).",
     }),
   ),
 });
@@ -183,13 +183,13 @@ export default function firstmateCrewKnowledge(pi: ExtensionAPI): void {
     name: "crew_apply_dispatch",
     label: "Crew Apply Dispatch",
     description:
-      "Generate a Firstmate config/crew-dispatch.json fragment from the knowledge pack. Dry-run by default; writes only under FM_HOME/config when dryRun=false.",
+      "Generate a Firstmate config/crew-dispatch.json from the knowledge pack. Dry-run by default; writes only under the resolved home/config when dryRun=false.",
     promptSnippet:
       "Build or dry-run write Firstmate crew-dispatch.json from curated profiles",
     promptGuidelines: [
       "Default dryRun=true — show JSON without writing.",
-      "Only set dryRun=false when the captain/Firstmate explicitly wants FM_HOME/config/crew-dispatch.json updated.",
-      "Never write outside FM_HOME/config.",
+      "Only set dryRun=false when the captain/Firstmate explicitly wants config/crew-dispatch.json updated under the resolved Firstmate home.",
+      "Never write outside that home's config/ directory.",
     ],
     parameters: APPLY_PARAMS,
     async execute(_id, params) {

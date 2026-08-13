@@ -122,7 +122,7 @@ function validateProfile(profile: unknown, path: string, errors: string[]): void
 export interface ApplyDispatchOptions {
   /** When true (default), do not write — only return content. */
   dryRun?: boolean;
-  /** Merge generated rules with an existing file when present. */
+  /** Append generated rules whose `when` text is absent. Unreadable/invalid existing files refuse the write. */
   merge?: boolean;
   /** Override FM_HOME resolution (tests). */
   fmHome?: string | null;
@@ -130,9 +130,10 @@ export interface ApplyDispatchOptions {
 }
 
 /**
- * Generate (and optionally write) config/crew-dispatch.json under FM_HOME.
+ * Generate (and optionally write) config/crew-dispatch.json under the resolved Firstmate home.
  * Writes are refused unless dryRun is explicitly false.
- * Never writes outside FM_HOME/config.
+ * Never writes outside <home>/config.
+ * merge refuses unreadable or invalid existing files instead of overwriting them.
  */
 export function applyDispatch(
   pack: KnowledgePack,
