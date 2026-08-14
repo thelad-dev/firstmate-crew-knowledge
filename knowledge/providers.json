@@ -75,13 +75,32 @@
       "nativeModelHints": ["grok-4", "grok-3", "latest"],
       "defaultHarness": "grok",
       "notes": "authStatus usable with empty windows is uncertainty, not logout."
+    },
+    {
+      "id": "kimi",
+      "label": "Kimi (Moonshot AI)",
+      "quotaProvider": "kimi",
+      "harnesses": ["kimi", "pi"],
+      "strengths": [
+        "long context window",
+        "coding tasks",
+        "Asian language support"
+      ],
+      "weaknesses": [
+        "newer provider with less track record",
+        "quota integration may be incomplete"
+      ],
+      "piModelPatterns": ["moonshot/kimi-*", "moonshot/*"],
+      "nativeModelHints": ["kimi-1.5", "kimi-2"],
+      "defaultHarness": "kimi"
     }
   ],
   "harnessNotes": {
-    "pi": "Pi coding-agent; model ids are provider/model. Can host anthropic, openai-codex, xai families when authenticated.",
+    "pi": "Pi coding-agent; model ids are provider/model. Can host anthropic, openai-codex, xai, moonshot families when authenticated.",
     "claude": "Claude Code / Claude CLI native harness.",
     "codex": "OpenAI Codex CLI harness.",
     "grok": "Grok CLI harness.",
+    "kimi": "Kimi CLI harness.",
     "cursor": "Cursor agent/composer path when the home supports it as a spawn harness."
   }
 }
