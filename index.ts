@@ -6,6 +6,9 @@
  *   crew_balance        — live quota-axi ranking snapshot
  *   crew_apply_dispatch — generate/update config/crew-dispatch.json (dry-run default)
  *   crew_suggest_primary — optional mid-session Pi model suggestion (no pane hijack)
+ *   crew_discover       — live model discovery from Pi, Claude, Codex, Grok, Kimi
+ *   crew_evidence       — local crew evidence from no-mistakes outcomes
+ *   crew_update_check   — compatibility check with current Firstmate version
  *
  * Does not replace Firstmate judgment or auto-spawn crewmates.
  */
@@ -192,7 +195,7 @@ export default function firstmateCrewKnowledge(pi: ExtensionAPI): void {
     promptSnippet:
       "Recommend Firstmate crew spawn profile (harness/model/effort) from task text and quota-axi",
     promptGuidelines: [
-      "Use crew_route before fm-spawn when choosing among Claude/Codex/Cursor/Grok profiles.",
+      "Use crew_route before fm-spawn when choosing among Claude/Codex/Cursor/Grok/Kimi profiles.",
       "Treat output as advice; Firstmate still decides and calls fm-spawn with concrete flags.",
       "If mode is degraded, prefer knowledge tables and disclose uncertainty.",
     ],
@@ -215,7 +218,7 @@ export default function firstmateCrewKnowledge(pi: ExtensionAPI): void {
       "Read live quota-axi --json and summarize provider headroom/runway for balanced multi-provider burn. Data only plus transparent sort — no spawn.",
     promptSnippet: "Show quota-aware provider balance for the captain fleet",
     promptGuidelines: [
-      "Call crew_balance when comparing remaining headroom across Claude, Codex, Cursor, Grok.",
+      "Call crew_balance when comparing remaining headroom across Claude, Codex, Cursor, Grok, Kimi.",
       "Do not invent credentials; missing quota-axi yields labeled degraded output.",
     ],
     parameters: BALANCE_PARAMS,

@@ -1,7 +1,7 @@
 {
   "name": "firstmate-crew-knowledge",
   "version": "0.1.0",
-  "description": "Pi-Extension für Firstmate: modell-/harness-Routing pro Task-Klasse und quota-bewusste Kandidatenbalance über Cursor, Claude, Codex und Grok.",
+  "description": "Pi-Extension für Firstmate: modell-/harness-Routing pro Task-Klasse und quota-bewusste Kandidatenbalance über Cursor, Claude, Codex, Grok und Kimi.",
   "keywords": [
     "pi-package",
     "pi-extension",
