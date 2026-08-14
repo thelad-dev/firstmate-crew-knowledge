@@ -26,6 +26,21 @@ import {
   formatSuggestPrimaryResult,
   suggestPrimary,
 } from "./src/suggest-primary.ts";
+import {
+  getCachedDiscovery,
+  getAvailableHarnesses,
+  isCacheStale,
+  clearCache as clearDiscoveryCache,
+} from "./src/discovery.ts";
+import {
+  loadAggregatedEvidence,
+  getBestModelForTask,
+} from "./src/evidence.ts";
+import {
+  checkCompatibility,
+  refreshAfterUpdate,
+  getFirstmateVersion,
+} from "./src/update.ts";
 
 const knowledge = loadKnowledge();
 
@@ -83,6 +98,41 @@ const SUGGEST_PRIMARY_PARAMS = Type.Object({
         "Optional filter over authenticated session models (provider, id, or name substring).",
     }),
   ),
+  format: Type.Optional(
+    Type.Union([Type.Literal("text"), Type.Literal("json")], {
+      description: "Response format (default text)",
+    }),
+  ),
+});
+
+const DISCOVERY_PARAMS = Type.Object({
+  forceRefresh: Type.Optional(
+    Type.Boolean({
+      description: "Force fresh discovery, bypassing cache (default false)",
+    }),
+  ),
+  format: Type.Optional(
+    Type.Union([Type.Literal("text"), Type.Literal("json")], {
+      description: "Response format (default text)",
+    }),
+  ),
+});
+
+const EVIDENCE_PARAMS = Type.Object({
+  taskClass: Type.Optional(
+    Type.String({
+      description:
+        "Optional task class filter: trivial_fix | standard_ship | hard_multi_file | research_web_live | scout_audit",
+    }),
+  ),
+  format: Type.Optional(
+    Type.Union([Type.Literal("text"), Type.Literal("json")], {
+      description: "Response format (default text)",
+    }),
+  ),
+});
+
+const UPDATE_CHECK_PARAMS = Type.Object({
   format: Type.Optional(
     Type.Union([Type.Literal("text"), Type.Literal("json")], {
       description: "Response format (default text)",
@@ -230,6 +280,199 @@ export default function firstmateCrewKnowledge(pi: ExtensionAPI): void {
         return textResult(JSON.stringify(payload, null, 2), payload);
       }
       return textResult(formatSuggestPrimaryResult(result), payload);
+    },
+  });
+
+  pi.registerTool({
+    name: "crew_discover",
+    label: "Crew Discover",
+    description:
+      "Discover available models and harnesses from Pi, Claude, Codex, Grok, Kimi. Returns cached results unless forceRefresh=true.",
+    promptSnippet: "Discover available models and harnesses",
+    promptGuidelines: [
+      "Use crew_discover to see what models are currently available.",
+      "Cache is valid for 15 minutes; use forceRefresh to bypass.",
+    ],
+    parameters: DISCOVERY_PARAMS,
+    async execute(_id, params) {
+      const discovery = getCachedDiscovery(params.forceRefresh || false);
+      const harnesses = getAvailableHarnesses();
+      const stale = isCacheStale();
+
+      if (params.format === "json") {
+        return textResult(
+          JSON.stringify({ discovery, harnesses, stale }, null, 2),
+          { discovery, harnesses, stale },
+        );
+      }
+
+      const lines = [
+        "# Model Discovery",
+        "",
+        `Cache: ${stale ? "STALE" : "fresh"} (timestamp: ${new Date(discovery.timestamp).toISOString()})`,
+        `Firstmate version: ${discovery.firstmateVersion || "unknown"}`,
+        `Models found: ${discovery.models.length}`,
+        "",
+        "## Available Harnesses",
+        "",
+      ];
+
+      for (const h of harnesses) {
+        lines.push(`### ${h.harness} (${h.models.length} models)`);
+        for (const model of h.models) {
+          lines.push(`  - ${model}`);
+        }
+        lines.push("");
+      }
+
+      if (discovery.errors.length > 0) {
+        lines.push("", "## Discovery Errors", "");
+        for (const err of discovery.errors) {
+          lines.push(`  - ${err}`);
+        }
+      }
+
+      return textResult(lines.join("\n"), { discovery, harnesses, stale });
+    },
+  });
+
+  pi.registerTool({
+    name: "crew_evidence",
+    label: "Crew Evidence",
+    description:
+      "View local crew evidence collected from no-mistakes outcomes. Shows aggregated metrics by task class and model.",
+    promptSnippet: "View local crew performance evidence",
+    promptGuidelines: [
+      "Use crew_evidence to see how different models perform on different task types.",
+      "Evidence is collected from actual no-mistakes task outcomes.",
+      "Privacy-conscious: no code content, no prompts, only metrics.",
+    ],
+    parameters: EVIDENCE_PARAMS,
+    async execute(_id, params) {
+      let evidence = loadAggregatedEvidence();
+
+      if (params.taskClass) {
+        evidence = evidence.filter((e) => e.taskClass === params.taskClass);
+      }
+
+      if (params.format === "json") {
+        return textResult(JSON.stringify(evidence, null, 2), evidence);
+      }
+
+      const lines = ["# Local Crew Evidence", ""];
+
+      if (evidence.length === 0) {
+        lines.push("No evidence collected yet.");
+        lines.push("");
+        lines.push(
+          "Evidence is automatically collected from no-mistakes task outcomes.",
+        );
+      } else {
+        lines.push(`Total entries: ${evidence.length}`);
+        lines.push("");
+
+        const byTaskClass = new Map<string, typeof evidence>();
+        for (const e of evidence) {
+          if (!byTaskClass.has(e.taskClass)) {
+            byTaskClass.set(e.taskClass, []);
+          }
+          byTaskClass.get(e.taskClass)!.push(e);
+        }
+
+        for (const [taskClass, entries] of byTaskClass) {
+          lines.push(`## ${taskClass}`);
+          lines.push("");
+
+          // Sort by success rate, then avg duration
+          entries.sort((a, b) => {
+            if (Math.abs(a.successRate - b.successRate) > 0.05) {
+              return b.successRate - a.successRate;
+            }
+            return a.avgDurationMs - b.avgDurationMs;
+          });
+
+          for (const e of entries) {
+            lines.push(
+              `### ${e.provider}/${e.model} (${e.effort})`,
+            );
+            lines.push(`  - Tasks: ${e.totalTasks}`);
+            lines.push(
+              `  - Success rate: ${(e.successRate * 100).toFixed(1)}%`,
+            );
+            lines.push(
+              `  - Avg duration: ${(e.avgDurationMs / 1000).toFixed(1)}s`,
+            );
+            lines.push(
+              `  - Avg rework: ${e.avgReworkCount.toFixed(1)}`,
+            );
+            if (e.avgTestPassRate > 0) {
+              lines.push(
+                `  - Test pass rate: ${(e.avgTestPassRate * 100).toFixed(1)}%`,
+              );
+            }
+            lines.push("");
+          }
+        }
+      }
+
+      return textResult(lines.join("\n"), evidence);
+    },
+  });
+
+  pi.registerTool({
+    name: "crew_update_check",
+    label: "Crew Update Check",
+    description:
+      "Check compatibility with current Firstmate version and report any breaking changes or warnings.",
+    promptSnippet: "Check Firstmate compatibility",
+    promptGuidelines: [
+      "Use crew_update_check after updating Firstmate.",
+      "Reports compatibility issues with dispatch schema, harnesses, spawn flags, etc.",
+    ],
+    parameters: UPDATE_CHECK_PARAMS,
+    async execute(_id, params) {
+      const result = checkCompatibility();
+      const version = getFirstmateVersion();
+
+      if (params.format === "json") {
+        return textResult(
+          JSON.stringify({ ...result, version }, null, 2),
+          { ...result, version },
+        );
+      }
+
+      const lines = [
+        "# Firstmate Compatibility Check",
+        "",
+        `Firstmate version: ${version || "unknown"}`,
+        `Compatible: ${result.compatible ? "✓" : "✗"}`,
+        "",
+      ];
+
+      if (result.errors.length > 0) {
+        lines.push("## Errors", "");
+        for (const err of result.errors) {
+          lines.push(`  ✗ ${err}`);
+        }
+        lines.push("");
+      }
+
+      if (result.warnings.length > 0) {
+        lines.push("## Warnings", "");
+        for (const warn of result.warnings) {
+          lines.push(`  ⚠ ${warn}`);
+        }
+        lines.push("");
+      }
+
+      lines.push("## Checks", "");
+      for (const check of result.checks) {
+        const icon =
+          check.status === "ok" ? "✓" : check.status === "warning" ? "⚠" : "✗";
+        lines.push(`  ${icon} ${check.check}: ${check.message}`);
+      }
+
+      return textResult(lines.join("\n"), { ...result, version });
     },
   });
 
