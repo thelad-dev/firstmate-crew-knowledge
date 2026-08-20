@@ -137,19 +137,19 @@ Hard Rule 4: Crewmates **never** address captain — IMPLEMENTIERT als Regel; Du
 
 ## 7. Firstmate-Abweichungen (Teil 20)
 
-| Current Firstmate | Expected | Gap | Knowledge Fix | Code Fix? |
-| --- | --- | --- | --- | --- |
-| Delegationsregel nur in AGENTS.md | Operational delegate-first | Kein Gate | `delegation-policy.md`, `delegation.json` | Pre-tool gate |
-| Kein Context-Dependency-Modell | VERY_LOW…VERY_HIGH vor Split | Fehlt | `context-aware-microtasking.md`, JSON | Optional classifier |
-| Brief `{TASK}` frei form | Context Pack bei Microtasks | Schema nicht validiert | `context-pack.json`, examples | Brief validator optional |
-| Scout report frei form | Evidence chain | Struktur optional | examples, microtasking doc | Template in fm-brief optional |
-| §9 Chat-Regeln | Kein Noise | Praxis drift | failure-modes §2 | Harness aggregation |
-| ask-user authority | Worker nie selbst | IMPLEMENTIERT | `approval-policy.md` | — |
-| Subagent guard | Primary nicht delegieren via Harness | IMPLEMENTIERT | delegation doc | — |
-| quota-array-dispatch | Ein Router | IMPLEMENTIERT | Kein zweiter Router in crew-knowledge | — |
-| Ship/Scout intake | Getrennt von Execution Mode | Konzeptverwechslung möglich | delegation-policy Tabelle | — |
-| fm-crew-state für Supervision | Current state | IMPLEMENTIERT | — | — |
-| Konflikt zwei Microtasks | Keine blinde Synthese | Nur Policy | evidenceChain in JSON | Merge gate optional |
+| Verhalten | Status | Evidenz |
+| --- | --- | --- |
+| Delegate-first vor Primary-Tool-Use auf `projects/` | NICHT VORHANDEN | Kein Gate in Firstmate; Policy in `docs/delegation-policy.md`, `knowledge/delegation.json` |
+| Context-Dependency-Modell (VERY_LOW…VERY_HIGH) vor Split | NICHT VORHANDEN | Kein Firstmate-Classifier; Policy in `docs/context-aware-microtasking.md`, `knowledge/delegation.json` |
+| Context Pack / Brief-Schema bei Microtasks | TEILWEISE | Brief-Tools `bin/fm-brief.sh`; Schema nicht erzwungen — `knowledge/context-pack.json`, `examples/` |
+| Evidence Chain in Scout-Reports | TEILWEISE | Struktur optional in Praxis; Felder in `knowledge/delegation.json` `evidenceChain`, `docs/context-aware-microtasking.md` |
+| Captain-Chat ohne Noise (§9) | DOKUMENTIERT | `AGENTS.md` §9; Katalog `docs/firstmate-failure-modes.md` §2 |
+| ask-user Authority (Worker beantwortet nicht selbst) | IMPLEMENTIERT | `AGENTS.md` §7, `docs/approval-policy.md`, `.agents/skills/ask-user-authority/SKILL.md` |
+| Primary nutzt keine Harness-Delegationstools | IMPLEMENTIERT | `bin/fm-subagent-pretool-check.sh`, `docs/subagent-guard.md` |
+| Ein Router: `quota-array-dispatch` (kein Parallel-Router in crew-knowledge) | IMPLEMENTIERT | `config/crew-dispatch.json`, `knowledge/delegation.json` ownership |
+| Ship/Scout Intake getrennt von Execution Mode | DOKUMENTIERT | `docs/delegation-policy.md` Tabelle Ship/Scout vs Mode; `knowledge/delegation.json` `executionModes` |
+| Supervision via `fm-crew-state` | IMPLEMENTIERT | `bin/fm-crew-state.sh` |
+| Keine blinde Synthese bei Konflikt zweier Microtasks | TEILWEISE | Policy `evidenceChain.noBlindSynthesis` in `knowledge/delegation.json`; kein Merge-Gate in Firstmate |
 
 ---
 

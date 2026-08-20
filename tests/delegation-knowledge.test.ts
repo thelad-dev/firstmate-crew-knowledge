@@ -39,13 +39,34 @@ describe("delegation knowledge pack", () => {
     assert.ok(p.sufficiencyGate.onNo.length >= 3);
   });
 
-  it("execution modes do not duplicate fm-spawn ownership", () => {
+  it("ownership keeps fm-spawn under Firstmate and execution modes match policy schema", () => {
     const d = loadJson("delegation.json");
-    const existing = d.ownership.firstmateExisting.join(" ");
-    assert.match(existing, /fm-spawn/);
-    assert.doesNotMatch(
-      JSON.stringify(d.executionModes),
-      /parallel router|auto-spawn/i,
+    assert.ok(
+      Array.isArray(d.ownership.firstmateExisting) &&
+        d.ownership.firstmateExisting.includes("bin/fm-spawn.sh"),
     );
+    assert.ok(
+      Array.isArray(d.ownership.knowledgePolicy) &&
+        d.ownership.knowledgePolicy.length > 0,
+    );
+    assert.ok(!d.ownership.knowledgePolicy.includes("bin/fm-spawn.sh"));
+    assert.ok(
+      Array.isArray(d.ownership.firstmateExtensionRequired) &&
+        !d.ownership.firstmateExtensionRequired.includes("bin/fm-spawn.sh"),
+    );
+    const modeIds = d.executionModes.map((m: { id: string }) => m.id);
+    assert.deepEqual(modeIds, [
+      "DIRECT_DELEGATION",
+      "MICROTASK",
+      "MICROTASK_CONTEXT_PACK",
+      "FULL_CONTEXT_DELEGATION",
+      "SCOUT_THEN_SHIP",
+    ]);
+    for (const mode of d.executionModes) {
+      assert.equal(typeof mode.id, "string");
+      assert.equal(typeof mode.label, "string");
+      assert.equal(typeof mode.when, "string");
+      assert.equal(typeof mode.shipScoutRelation, "string");
+    }
   });
 });
