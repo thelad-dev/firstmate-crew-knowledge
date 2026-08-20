@@ -1,14 +1,16 @@
 # Delegationsrichtlinie
 
-Operationalisiert Firstmates bestehende Orchestrator-Rolle (`AGENTS.md` §1, §7). **Kein Ersatz** für `fm-spawn`, `quota-array-dispatch` oder `config/crew-dispatch.json`.
+Operationalisiert Firstmates bestehende Orchestrator-Rolle (Firstmate `AGENTS.md` §1, §7). **Kein Ersatz** für Firstmate `fm-spawn`, `quota-array-dispatch` oder `config/crew-dispatch.json`.
+
+> Evidenz mit Prefix **Firstmate** bezieht sich auf den [kunchenguid/firstmate](https://github.com/kunchenguid/firstmate)-Checkout (`$FM_HOME`), nicht auf lokales crew-knowledge `AGENTS.md`/`docs/`. Siehe `docs/README.md` § Evidenz-Pfade.
 
 ## Status Firstmate (Code-Evidenz)
 
 | Verhalten | Status | Evidenz |
 | --- | --- | --- |
-| Firstmate delegiert projektbezogene Arbeit grundsätzlich | DOKUMENTIERT | `AGENTS.md` §1: „Outside hard rule 1 … you do not do project-specific work yourself“ |
-| Spawn nur über `fm-spawn.sh` | IMPLEMENTIERT | `bin/fm-spawn.sh`, `AGENTS.md` §7 |
-| Primary darf Harness-Delegationstools nicht nutzen | IMPLEMENTIERT | `bin/fm-subagent-pretool-check.sh`, `docs/subagent-guard.md` |
+| Firstmate delegiert projektbezogene Arbeit grundsätzlich | DOKUMENTIERT | Firstmate `AGENTS.md` §1: „Outside hard rule 1 … you do not do project-specific work yourself“ |
+| Spawn nur über `fm-spawn.sh` | IMPLEMENTIERT | Firstmate `bin/fm-spawn.sh`, Firstmate `AGENTS.md` §7 |
+| Primary darf Harness-Delegationstools nicht nutzen | IMPLEMENTIERT | Firstmate `bin/fm-subagent-pretool-check.sh`, Firstmate `docs/subagent-guard.md` |
 | Automatischer Delegations-Check vor jeder Primary-Aktion | NICHT VORHANDEN | Kein Gate in Firstmate vor Tool-Use auf `projects/` **[UNVERIFIED: nur negativ durch Codeabsence]** |
 | Kontext-Dependency-Klassifikation | NICHT VORHANDEN | Kein Firstmate-Modul; Policy in `knowledge/delegation.json` |
 
@@ -28,7 +30,7 @@ Nicht: erst selbst analysieren, planen, Dateien lesen, dann „irgendwann“ spa
 - Statusauswertung (`fm-crew-state.sh`), Ergebnisbewertung, Eskalation
 - Zusammenführung von Worker-Ergebnissen
 - Fleet-/State-Verwaltung, Brief/Spawn/Send/Control
-- Kurze captain-relevante Kommunikation (§9 Etikette)
+- Kurze captain-relevante Kommunikation (Firstmate `AGENTS.md` §9 Etikette)
 
 ### Unzulässig als Normalfall
 
@@ -49,7 +51,7 @@ Diese Policy soll **nicht** jede Kleinigkeit durch Firstmate-Kopf laufen lassen.
 
 | Konzept | Owner | Bedeutung |
 | --- | --- | --- |
-| **Ship / Scout** | Firstmate Intake (`AGENTS.md` §7) | Deliverable-Typ: Code/PR vs. `data/<id>/report.md` |
+| **Ship / Scout** | Firstmate Intake (Firstmate `AGENTS.md` §7) | Deliverable-Typ: Code/PR vs. `data/<id>/report.md` |
 | **Execution Mode** | `knowledge/delegation.json` | **Wie** delegiert wird: direct, microtask, context pack, full-context, scout→ship |
 
 Scout→Ship ist kein Duplikat: Scout ist Intake-Klassifikation; „SCOUT_THEN_SHIP“ ist ein Ausführungsmodus bei hoher Unsicherheit.
@@ -58,9 +60,9 @@ Scout→Ship ist kein Duplikat: Scout ist Intake-Klassifikation; „SCOUT_THEN_S
 
 Weiterhin **nur** über bestehenden Firstmate-Dispatch:
 
-1. `config/crew-dispatch.json` / `crew_apply_dispatch` (optional)
-2. `quota-array-dispatch` bei Profil-Arrays
-3. Konkrete Flags an `fm-spawn.sh`
+1. Firstmate `config/crew-dispatch.json` / `crew_apply_dispatch` (optional)
+2. Firstmate `quota-array-dispatch` bei Profil-Arrays
+3. Konkrete Flags an Firstmate `bin/fm-spawn.sh`
 
 Zusätzliche **Knowledge-Faktoren** (kein paralleles Routing): Context Dependency, Task Complexity, Change Risk, Required Reasoning, Repository Knowledge, Output Requirements. Sie informieren Brief-Inhalt und Moduswahl, nicht einen zweiten Router.
 
