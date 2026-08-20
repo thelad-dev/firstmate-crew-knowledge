@@ -16,6 +16,7 @@ Pi-Package (`pi-package`), das Firstmate bei Crew-Routing und Quota-Balance unte
   - `evidence.ts`: Lokale Evidenz-Sammlung aus no-mistakes
   - `knowledge-layers.ts`: Drei-Ebenen Knowledge System mit Conflict Resolution
   - `update.ts`: Compatibility Checks und Firstmate-Version-Awareness
+- Delegation/Microtasking (Policy, kein paralleles Routing): `knowledge/delegation.json`, `knowledge/context-pack.json`, `docs/` (siehe `docs/README.md`)
 
 ## Was es nicht ist
 

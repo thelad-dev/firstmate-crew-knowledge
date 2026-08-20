@@ -68,6 +68,14 @@ Schema der Dispatch-Datei entspricht Firstmate `docs/examples/crew-dispatch.json
 
 Ohne aufgelöstes Home (`FM_HOME` oder Fallback `FM_ROOT_OVERRIDE`) nur Dry-Run/Anzeige — **keine** Writes. Writes gehen ausschließlich nach `<Home>/config/…` (explizites Tool mit `dryRun=false`).
 
+## Delegation & Microtasking (Policy)
+
+Context-aware Delegation und Microtasking sind **Knowledge/Policy** — Firstmate bleibt Authority für Spawn, Approval und `quota-array-dispatch`.
+
+- Doku: [`docs/README.md`](docs/README.md)
+- Tabellen: `knowledge/delegation.json`, `knowledge/context-pack.json`
+- Beispiele: [`examples/`](examples/), Evaluation: [`evaluation/delegation-cases.md`](evaluation/delegation-cases.md)
+
 ## Knowledge-Pack
 
 Datengetrieben unter [`knowledge/`](knowledge/):
