@@ -4,6 +4,8 @@ Bekannte Fehlverhalten und Lücken — mit Firstmate-Evidenz. Keine Vermutungen 
 
 Enthält: Delegations-Eigenarbeit, Captain-Chat-Rauschen, Approval, Crewmate→Captain, Abweichungstabelle.
 
+> Evidenz mit Prefix **Firstmate** bezieht sich auf den [kunchenguid/firstmate](https://github.com/kunchenguid/firstmate)-Checkout (`$FM_HOME`), nicht auf lokales crew-knowledge `AGENTS.md`/`docs/`. Relative Pfade ohne Prefix sind lokal hier. Siehe `docs/README.md` § Evidenz-Pfade.
+
 ---
 
 ## 1. Delegation: unnötige Eigenarbeit
@@ -14,8 +16,8 @@ Firstmate erledigt projektbezogene Arbeit selbst, obwohl ein Worker verfügbar i
 
 ### Current Behaviour
 
-- Regel existiert: `AGENTS.md` §1 delegiert Coding/Investigation/Planning an Crewmates.
-- Primary-Guard blockiert Harness-Delegationstools (`docs/subagent-guard.md`).
+- Regel existiert: Firstmate `AGENTS.md` §1 delegiert Coding/Investigation/Planning an Crewmates.
+- Primary-Guard blockiert Harness-Delegationstools (Firstmate `docs/subagent-guard.md`).
 - **Kein** erzwungener „delegate-first“-Check vor Read/Edit in `projects/`.
 
 ### Expected Behaviour
@@ -26,7 +28,7 @@ Jede Aufgabe: delegierbar → sofort Brief + `fm-spawn`, ohne Voranalyse durch F
 
 | Ursache | Evidenz / Klassifikation |
 | --- | --- |
-| Prompt-Konflikt: „hilf dem Captain“ vs. Delegation | DOKUMENTIERT Widerspruchspotential in §1 vs. §9 Hilfsbereitschaft |
+| Prompt-Konflikt: „hilf dem Captain“ vs. Delegation | DOKUMENTIERT Widerspruchspotential in Firstmate `AGENTS.md` §1 vs. §9 Hilfsbereitschaft |
 | Fehlender Delegations-Check vor Tool-Use | NICHT VORHANDEN in Firstmate-Code |
 | Vorarbeit vor `fm-spawn` (Repo lesen, Plan schreiben) | FEHLERHAFT vs. Policy; häufiges Agent-Verhalten **[UNVERIFIED quantitativ]** |
 | Wiedereinstieg nach Worker-Ergebnis (selbst fixen) | DOKUMENTIERT verboten außer Supervision; Praxis **[UNVERIFIED]** |
@@ -56,11 +58,11 @@ Captain sieht Systemevents, Watcher, Status, Heartbeats, Tool-Output, Crew-Lifec
 
 | Mechanismus | Status |
 | --- | --- |
-| „Interne Mechanik nicht captain-facing“ | DOKUMENTIERT `AGENTS.md` §8–§9 |
-| Status-Dateien append-only, nicht verbatim relay | DOKUMENTIERT §9 |
-| Watcher absorbiert benign wakes | IMPLEMENTIERT `docs/architecture.md` |
-| Away-Mode batched digest | IMPLEMENTIERT §8 |
-| „Captain, shipshape.“ für no-op | DOKUMENTIERT §9 |
+| „Interne Mechanik nicht captain-facing“ | DOKUMENTIERT Firstmate `AGENTS.md` §8–§9 |
+| Status-Dateien append-only, nicht verbatim relay | DOKUMENTIERT Firstmate `AGENTS.md` §9 |
+| Watcher absorbiert benign wakes | IMPLEMENTIERT Firstmate `docs/architecture.md` |
+| Away-Mode batched digest | IMPLEMENTIERT Firstmate `AGENTS.md` §8 |
+| „Captain, shipshape.“ für no-op | DOKUMENTIERT Firstmate `AGENTS.md` §9 |
 
 ### Expected Behaviour
 
@@ -78,7 +80,7 @@ Captain Chat = Auftrag + echte Rückfrage + echter Blocker + relevantes Ergebnis
 ### Proposed Fix
 
 - Transport/Harness-Ursache: nicht nur Prompt verschärfen — aggregieren oder intern halten.
-- Knowledge: Übersetzungsregeln in §9 bleiben authoritative; crew-knowledge verweist.
+- Knowledge: Übersetzungsregeln in Firstmate `AGENTS.md` §9 bleiben authoritative; crew-knowledge verweist.
 
 ---
 
@@ -88,7 +90,7 @@ Siehe `docs/approval-policy.md`.
 
 ### Current Behaviour
 
-No-Mistakes ask-user ist IMPLEMENTIERT; Authority in `ask-user-authority` SKILL.
+No-Mistakes ask-user ist IMPLEMENTIERT; Authority in Firstmate `.agents/skills/ask-user-authority/SKILL.md`.
 
 ### Failure Pattern
 
@@ -119,8 +121,8 @@ Hard Rule 4: Crewmates **never** address captain — IMPLEMENTIERT als Regel; Du
 | Muster | Erwartung |
 | --- | --- |
 | Kein Spawn trotz Ship-Intent | Delegationsfehler |
-| Scout statt Ship ohne Unsicherheit | Falsche Intake-Klassifikation §7 |
-| Parallel Scout + Ship ohne Autorisierung | Verboten §7 |
+| Scout statt Ship ohne Unsicherheit | Falsche Intake-Klassifikation (Firstmate `AGENTS.md` §7) |
+| Parallel Scout + Ship ohne Autorisierung | Verboten (Firstmate `AGENTS.md` §7) |
 | Falscher Execution Mode (Microtask ohne Pack) | Knowledge-Fix + Brief |
 
 ---
@@ -141,14 +143,14 @@ Hard Rule 4: Crewmates **never** address captain — IMPLEMENTIERT als Regel; Du
 | --- | --- | --- |
 | Delegate-first vor Primary-Tool-Use auf `projects/` | NICHT VORHANDEN | Kein Gate in Firstmate; Policy in `docs/delegation-policy.md`, `knowledge/delegation.json` |
 | Context-Dependency-Modell (VERY_LOW…VERY_HIGH) vor Split | NICHT VORHANDEN | Kein Firstmate-Classifier; Policy in `docs/context-aware-microtasking.md`, `knowledge/delegation.json` |
-| Context Pack / Brief-Schema bei Microtasks | TEILWEISE | Brief-Tools `bin/fm-brief.sh`; Schema nicht erzwungen — `knowledge/context-pack.json`, `examples/` |
+| Context Pack / Brief-Schema bei Microtasks | TEILWEISE | Brief-Tools Firstmate `bin/fm-brief.sh`; Schema nicht erzwungen — `knowledge/context-pack.json`, `examples/` |
 | Evidence Chain in Scout-Reports | TEILWEISE | Struktur optional in Praxis; Felder in `knowledge/delegation.json` `evidenceChain`, `docs/context-aware-microtasking.md` |
-| Captain-Chat ohne Noise (§9) | DOKUMENTIERT | `AGENTS.md` §9; Katalog `docs/firstmate-failure-modes.md` §2 |
-| ask-user Authority (Worker beantwortet nicht selbst) | IMPLEMENTIERT | `AGENTS.md` §7, `docs/approval-policy.md`, `.agents/skills/ask-user-authority/SKILL.md` |
-| Primary nutzt keine Harness-Delegationstools | IMPLEMENTIERT | `bin/fm-subagent-pretool-check.sh`, `docs/subagent-guard.md` |
-| Ein Router: `quota-array-dispatch` (kein Parallel-Router in crew-knowledge) | IMPLEMENTIERT | `config/crew-dispatch.json`, `knowledge/delegation.json` ownership |
+| Captain-Chat ohne Noise (§9) | DOKUMENTIERT | Firstmate `AGENTS.md` §9; Katalog `docs/firstmate-failure-modes.md` §2 |
+| ask-user Authority (Worker beantwortet nicht selbst) | IMPLEMENTIERT | Firstmate `AGENTS.md` §7, `docs/approval-policy.md`, Firstmate `.agents/skills/ask-user-authority/SKILL.md` |
+| Primary nutzt keine Harness-Delegationstools | IMPLEMENTIERT | Firstmate `bin/fm-subagent-pretool-check.sh`, Firstmate `docs/subagent-guard.md` |
+| Ein Router: `quota-array-dispatch` (kein Parallel-Router in crew-knowledge) | IMPLEMENTIERT | Firstmate `config/crew-dispatch.json`, `knowledge/delegation.json` ownership |
 | Ship/Scout Intake getrennt von Execution Mode | DOKUMENTIERT | `docs/delegation-policy.md` Tabelle Ship/Scout vs Mode; `knowledge/delegation.json` `executionModes` |
-| Supervision via `fm-crew-state` | IMPLEMENTIERT | `bin/fm-crew-state.sh` |
+| Supervision via `fm-crew-state` | IMPLEMENTIERT | Firstmate `bin/fm-crew-state.sh` |
 | Keine blinde Synthese bei Konflikt zweier Microtasks | TEILWEISE | Policy `evidenceChain.noBlindSynthesis` in `knowledge/delegation.json`; kein Merge-Gate in Firstmate |
 
 ---
@@ -165,6 +167,6 @@ Hard Rule 4: Crewmates **never** address captain — IMPLEMENTIERT als Regel; Du
 | Firstmate-Flaschenhoss? | direct delegation für Simple Cases |
 | Konflikterkennung? | evidenceChain, noBlindSynthesis |
 | Crewmate→Captain? | Hard Rule 4 + failure §4 |
-| Chat-Noise? | failure §2 + AGENTS §9 pointer |
+| Chat-Noise? | failure §2 + Firstmate `AGENTS.md` §9 pointer |
 | Ship/Scout-Widersprüche? | Tabelle delegation-policy |
 | Behauptete Fähigkeiten code-belegt? | Status-Spalten mit Pfaden |

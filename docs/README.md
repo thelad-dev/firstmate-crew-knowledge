@@ -1,6 +1,6 @@
 # Dokumentation — Delegation & Microtasking
 
-Policy und Beispiele für Firstmate-Orchestrierung. **Ersetzt Firstmate nicht** — siehe `AGENTS.md` im Firstmate-Repo.
+Policy und Beispiele für Firstmate-Orchestrierung. **Ersetzt Firstmate nicht** — siehe Firstmate `AGENTS.md`.
 
 | Dokument | Inhalt |
 | --- | --- |
@@ -25,3 +25,7 @@ Policy und Beispiele für Firstmate-Orchestrierung. **Ersetzt Firstmate nicht** 
 ## Tools (unverändert)
 
 `crew_route`, `crew_balance`, `fm-spawn` — Routing bleibt Firstmate + `quota-array-dispatch`.
+
+## Evidenz-Pfade
+
+Status- und Evidence-Spalten mit Prefix **Firstmate** verweisen auf Dateien im [kunchenguid/firstmate](https://github.com/kunchenguid/firstmate)-Checkout (bzw. `$FM_HOME`), nicht auf dieses crew-knowledge-Paket. Relative Pfade ohne Prefix (`docs/…`, `knowledge/…`, `examples/`) sind lokal hier.

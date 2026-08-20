@@ -54,13 +54,15 @@ Was könnte ein Worker **ohne** Gesamtverständnis falsch entscheiden? → in **
 
 ## Integration in Firstmate-Briefs
 
-`bin/fm-brief.sh` ersetzt `{TASK}` mit Auftragstext — **Firstmate** muss Context-Pack-Felder im Brief-Body ergänzen, wenn Microtasks geplant sind.
+Firstmate `bin/fm-brief.sh` ersetzt `{TASK}` mit Auftragstext — **Firstmate** muss Context-Pack-Felder im Brief-Body ergänzen, wenn Microtasks geplant sind.
+
+> Evidenz mit Prefix **Firstmate** bezieht sich auf den [kunchenguid/firstmate](https://github.com/kunchenguid/firstmate)-Checkout (`$FM_HOME`). Siehe `docs/README.md` § Evidenz-Pfade.
 
 Status Firstmate:
 
 | Mechanismus | Status |
 | --- | --- |
-| Brief-Scaffold mit `{TASK}` | IMPLEMENTIERT (`bin/fm-brief.sh`) |
+| Brief-Scaffold mit `{TASK}` | IMPLEMENTIERT (Firstmate `bin/fm-brief.sh`) |
 | Validiertes Context-Pack-Schema | NICHT VORHANDEN (Policy in crew-knowledge) |
 | Automatische Pack-Generierung | NICHT VORHANDEN |
 
