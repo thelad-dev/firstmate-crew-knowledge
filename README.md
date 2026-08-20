@@ -132,6 +132,7 @@ Tests laufen ohne Netzwerk gegen Fixture-JSON unter `tests/fixtures/`.
 - **Phase 3 (Update)**: `tests/update.test.ts` – Compatibility Checks, Version Detection
 - **Phase 4 (Compatibility)**: Alle Tests prüfen Dispatch-Schema, Harness-Verfügbarkeit, Effort-Werte
 - **Phase 5 (Evidence)**: `tests/evidence.test.ts` – Privacy-conscious Metric Collection, Aggregation
+- **Delegation Knowledge**: `tests/delegation-knowledge.test.ts` – JSON-Struktur für Delegation/Context-Pack, Ownership, Evaluation A–H
 
 Alle Tests müssen grün sein (`npm test`).
 

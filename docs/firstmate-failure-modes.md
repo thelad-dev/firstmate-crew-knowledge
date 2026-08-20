@@ -164,7 +164,7 @@ Hard Rule 4: Crewmates **never** address captain — IMPLEMENTIERT als Regel; Du
 | Context-Loss-Risiko adressiert? | compressionVsLoss + sufficiency |
 | Zweite Routing/Approval-Engine? | Nein — nur Policy |
 | Duplikate zu Firstmate? | Ship/Scout vs Execution Mode getrennt dokumentiert |
-| Firstmate-Flaschenhoss? | direct delegation für Simple Cases |
+| Firstmate-Flaschenhals? | direct delegation für Simple Cases |
 | Konflikterkennung? | evidenceChain, noBlindSynthesis |
 | Crewmate→Captain? | Hard Rule 4 + failure §4 |
 | Chat-Noise? | failure §2 + Firstmate `AGENTS.md` §9 pointer |

@@ -11,9 +11,7 @@ fm-spawn.sh <id> myshop --scout --harness ...
 
 Deliverable: `data/<id>/report.md` — **kein PR**.
 
-Scout Evidence Chain im Report:
-
-- FINDINGS / EVIDENCE / FILES / CONFIDENCE / OPEN QUESTIONS / RECOMMENDATION
+Scout Evidence Chain im Report: Felder laut `knowledge/delegation.json` → `evidenceChain.requiredFields` (Erläuterung: `docs/context-aware-microtasking.md`).
 
 ## Phase 2: Captain
 
