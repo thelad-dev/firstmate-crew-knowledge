@@ -7,7 +7,7 @@ Pi-Package (`pi-package`), das Firstmate bei Crew-Routing und Quota-Balance unte
 - Installierbare Extension: `package.json` → `"pi": { "extensions": ["./index.ts"] }`
 - Tools: `crew_route`, `crew_balance`, `crew_apply_dispatch`, `crew_suggest_primary`, `crew_discover`, `crew_evidence`, `crew_update_check`
 - Knowledge: Drei-Ebenen System
-  - Basis: `knowledge/*.json` (Task-Klassen, Provider, Profile)
+  - Basis: `knowledge/*.json` (siehe `knowledge/README.md`)
   - Hersteller: `knowledge/manufacturers/` (Official Docs, Manufacturer Claims)
   - Benchmarks: `knowledge/benchmarks/` (Artificial Analysis, HumanEval, etc.)
   - Lokale Evidenz: `knowledge/local/` (no-mistakes Outcomes, privacy-conscious)
