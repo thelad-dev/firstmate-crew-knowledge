@@ -25,6 +25,9 @@
     "index.ts",
     "src/",
     "knowledge/",
+    "docs/",
+    "examples/",
+    "evaluation/",
     "README.md",
     "LICENSE",
     "AGENTS.md"

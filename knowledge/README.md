@@ -9,6 +9,10 @@ Datengetriebene Tabellen für `firstmate-crew-knowledge`. Tool-Code liest diese 
 | `task-classes.json` | Task-Klassen (trivial → scout), Keywords, bevorzugte Profile |
 | `providers.json` | Provider-Rollen (Claude, Codex, Cursor, Grok, Kimi), Harness- und Model-Muster |
 | `profiles.json` | Konkrete `{harness, model, effort}`-Profile + Dispatch-Template |
+| `delegation.json` | Context Dependency, Execution Modes, Evidence Chain (Policy, kein Spawn) |
+| `context-pack.json` | Pflichtfelder für Microtask Context Packs |
+
+Delegation/Microtasking-Doku: [`docs/README.md`](../docs/README.md).
 
 ## Drei-Ebenen Knowledge System
 
