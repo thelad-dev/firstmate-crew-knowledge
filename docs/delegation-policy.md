@@ -19,7 +19,7 @@ Operationalisiert Firstmates bestehende Orchestrator-Rolle (Firstmate `AGENTS.md
 Für **jede** eingehende Aufgabe zuerst:
 
 > Kann ein Worker das zuverlässig erledigen?  
-> **Ja → sofort delegieren** (Brief, `crew_route` optional, `fm-spawn`).  
+> **Ja → sofort delegieren** (Brief, optional Skill `crew-knowledge` für Profile, `fm-spawn`).  
 > **Nein →** Ausnahme benennen und dokumentieren.
 
 Nicht: erst selbst analysieren, planen, Dateien lesen, dann „irgendwann“ spawnen.
@@ -45,7 +45,7 @@ Diese Policy soll **nicht** jede Kleinigkeit durch Firstmate-Kopf laufen lassen.
 
 - Einfache, klar begrenzte Aufgaben: **direkt delegieren**, ohne Microtask-Zerlegung
 - Microtasking nur bei plausibem Vorteil (Parallelität, isolierte Verifikation)
-- `crew_route` / `crew_balance` sind **optional** vor Spawn, kein Pflicht-Audit pro Slice
+- Skill `crew-knowledge` + `quota-axi` sind **optional** vor Spawn, kein Pflicht-Audit pro Slice
 
 ## Ship vs. Scout vs. Ausführungsmodus
 

@@ -1,6 +1,6 @@
 # Dokumentation — Delegation & Microtasking
 
-Policy und Beispiele für Firstmate-Orchestrierung. **Ersetzt Firstmate nicht** — siehe Firstmate `AGENTS.md`.
+Policy und Beispiele für Firstmate-Orchestrierung. **Ersetzt Firstmate nicht** — siehe Firstmate `AGENTS.md`. Agent-Einstieg: [`../SKILL.md`](../SKILL.md).
 
 | Dokument | Inhalt |
 | --- | --- |
@@ -22,10 +22,11 @@ Policy und Beispiele für Firstmate-Orchestrierung. **Ersetzt Firstmate nicht** 
 - [`../examples/`](../examples/) — sechs Szenarien
 - [`../evaluation/delegation-cases.md`](../evaluation/delegation-cases.md) — Fälle A–H
 
-## Tools (unverändert)
+## Routing
 
-`crew_route`, `crew_balance`, `fm-spawn` — Routing bleibt Firstmate + `quota-array-dispatch`.
+Profile-Hinweise kommen aus `knowledge/task-classes.json` + `knowledge/profiles.json` und dem Skill-Workflow.
+Finale Auswahl: Firstmate + Skill `quota-array-dispatch` + `bin/fm-spawn.sh`. Es gibt **keine** MCP-Tools mehr.
 
 ## Evidenz-Pfade
 
-Status- und Evidence-Spalten mit Prefix **Firstmate** verweisen auf Dateien im [kunchenguid/firstmate](https://github.com/kunchenguid/firstmate)-Checkout (bzw. `$FM_HOME`), nicht auf dieses crew-knowledge-Paket. Relative Pfade ohne Prefix (`docs/…`, `knowledge/…`, `examples/`) sind lokal hier.
+Status- und Evidence-Spalten mit Prefix **Firstmate** verweisen auf Dateien im [kunchenguid/firstmate](https://github.com/kunchenguid/firstmate)-Checkout (bzw. `$FM_HOME`), nicht auf dieses Repo. Relative Pfade ohne Prefix (`docs/…`, `knowledge/…`, `examples/`) sind lokal hier.

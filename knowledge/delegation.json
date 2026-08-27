@@ -59,7 +59,7 @@
         "description": "Nearly local: syntax, symbol lookup, pattern check, isolated SQL explanation.",
         "microtaskDefault": "often",
         "typicalWorkerContext": "single file or symbol slice",
-        "routingHint": "Prefer cheap profiles when crew_route agrees; still use fm-spawn flags, not a parallel router."
+        "routingHint": "Prefer cheap profiles when crew-knowledge agrees; still use fm-spawn flags, not a parallel router."
       },
       {
         "id": "LOW",

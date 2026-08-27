@@ -71,14 +71,14 @@ Firstmate erzwingt dieses Format heute **nicht** strukturell (NICHT VORHANDEN); 
 
 ## Modell-/Harness-Wahl
 
-Nach Modus und Dependency Brief schärfen, dann bestehenden Dispatch nutzen (`crew_route`, `quota-array-dispatch`, `fm-spawn`). Context Dependency VERY_LOW rechtfertigt günstigere Profile **nur** wenn Qualitätsboden (`task-classes.json` `qualityFloor`) passt.
+Nach Modus und Dependency Brief schärfen, dann bestehenden Dispatch nutzen (Skill `crew-knowledge`, `quota-array-dispatch`, `fm-spawn`). Context Dependency VERY_LOW rechtfertigt günstigere Profile **nur** wenn Qualitätsboden (`task-classes.json` `qualityFloor`) passt.
 
-## Bezug zu crew-knowledge Tools
+## Bezug zu Routing-Hilfen
 
-| Tool | Rolle bei Microtasking |
+| Hilfe | Rolle bei Microtasking |
 | --- | --- |
-| `crew_route` | Harness/Model/Effort pro Task-Klasse — **nicht** Zerlegung |
-| `crew_balance` | Quota bei parallelen Microtasks |
-| `crew_apply_dispatch` | Optional NL-Regeln in `crew-dispatch.json` |
+| Skill `crew-knowledge` | Profile-Hinweise pro Task-Klasse — **nicht** Zerlegung |
+| `quota-axi` + `quota-array-dispatch` | Quota bei parallelen Microtasks / Profil-Arrays |
+| `config/crew-dispatch.json` | NL-Regeln (Firstmate Authority) |
 
-Kein neues Routing in diesem Paket.
+Kein paralleles Routing in diesem Repo.

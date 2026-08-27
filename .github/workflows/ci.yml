@@ -6,15 +6,10 @@ on:
   pull_request:
 
 jobs:
-  test:
+  validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-      - name: Install dev dependencies
-        run: npm install --no-fund --no-audit
-      - name: Unit tests
-        run: npm test
+      - name: Validate knowledge JSON and skill surface
+        run: bash ./scripts/validate-knowledge.sh

@@ -33,7 +33,7 @@ Manuelle / Drill-Fälle A–H für Firstmate + crew-knowledge Policy. Jeder Fall
 | Context Dependency | LOW each |
 | Execution Mode | 3× MICROTASK parallel |
 | Captain | Aggregierte Findings, Evidence Chain |
-| Pass | `crew_balance` sinnvoll; Konflikt → Fall F Regeln |
+| Pass | `quota-axi` + Skill `crew-knowledge` sinnvoll; Konflikt → Fall F Regeln |
 
 ## D — Multi-Service-Architektur
 

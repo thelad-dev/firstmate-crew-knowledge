@@ -11,7 +11,7 @@
 ## Firstmate (Orchestrator)
 
 1. Brief mit `{TASK}` = exakte Zeile + Dateipfad
-2. `crew_route` optional → `trivial_fix` / cheap profile
+2. Skill `crew-knowledge` optional → `trivial_fix` / cheap profile
 3. `fm-spawn.sh` — **kein** vorheriges Editieren durch Firstmate
 
 ## Context Pack (minimal)

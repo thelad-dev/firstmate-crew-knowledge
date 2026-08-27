@@ -32,7 +32,7 @@ SYSTEM CONTEXT:
 
 ## Routing
 
-`crew_route` → `standard_ship`; Mode bleibt Firstmate + `quota-array-dispatch`.
+Skill `crew-knowledge` → `standard_ship`; Mode bleibt Firstmate + `quota-array-dispatch`.
 
 ## Progressive Expansion
 

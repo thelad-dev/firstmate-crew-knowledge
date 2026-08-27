@@ -1,8 +1,5 @@
-node_modules/
-.no-mistakes/
-*.log
 .DS_Store
-*.tsbuildinfo
-.pi/
-dist/
-coverage/
+*.log
+.no-mistakes/
+knowledge/local/evidence.json
+knowledge/local/aggregated.json

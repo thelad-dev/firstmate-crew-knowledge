@@ -24,7 +24,7 @@ OUT OF SCOPE: Unlisted packages
 
 ## Routing
 
-`crew_route` → `hard_multi_file` → strong profile via `quota-array-dispatch`.
+Skill `crew-knowledge` → `hard_multi_file` → strong profile via `quota-array-dispatch`.
 
 ## Warum nicht Microtask
 
